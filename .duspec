@@ -1,0 +1,25 @@
+{
+  "id":"deltics.json",
+  "version":"",
+  "summary":"Provides classes for working with Json structured data.",
+  "tags":[
+    "deltics",
+    "delphi",
+    "json"
+  ],
+  "compiler":{
+      "language":"pascal",
+      "product":"delphi",
+      "versions":"[7 .. 10.3], !8"
+    },
+  "copyright":"\u00A92019 Jolyon Direnko-Smith",
+  "language":"en",
+  "content":"source",
+  "dependencies":[],
+  "source":{
+      "files":[
+        "src\\deltics.json.inc",
+        "src\\Deltics.Json.pas"
+      ]
+    }
+}

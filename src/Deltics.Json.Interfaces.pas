@@ -6,6 +6,9 @@
 
 interface
 
+  uses
+    Deltics.Strings;
+
 
   type
     TValueType = (jsObject, jsArray, jsString, jsNumber, jsBoolean, jsNull);

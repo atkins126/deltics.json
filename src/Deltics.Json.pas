@@ -53,64 +53,84 @@ interface
   { deltics: }
     Deltics.Datetime,
     Deltics.IO.Text,
-    Deltics.Strings;
+    Deltics.Strings,
+    Deltics.Json.Interfaces,
+    Deltics.Json.Object_,
+    Deltics.Json.String_;
 
 
   type
-    JSON = class;
+    TJsonValueType = Deltics.Json.Interfaces.TValueType;
+  const
+    jsObject    = Deltics.Json.Interfaces.jsObject;
+    jsArray     = Deltics.Json.Interfaces.jsArray;
+    jsString    = Deltics.Json.Interfaces.jsString;
+    jsNumber    = Deltics.Json.Interfaces.jsNumber;
+    jsBoolean   = Deltics.Json.Interfaces.jsBoolean;
+    jsNull      = Deltics.Json.Interfaces.jsNull;
 
-    TJSONDateTimeParts = (dpYear, dpMonth, dpDay, dpTime, dpOffset);
-    TJSONDatePart = dpYear..dpDay;
 
-    TJSONValue = class;
-      TJSONBoolean = class;
-      TJSONNull = class;
-      TJSONNumber = class;
-      TJSONInteger = class;
-      TJSONString = class;
-      TJSONStructure = class;
-        TJSONArray  = class;
-        TJSONObject  = class;
+  type
+    IJsonObject = Deltics.Json.Interfaces.IJsonObject;
+    JsonObject  = Deltics.Json.Object_.JsonObject;
+
+    IJsonString = Deltics.Json.Interfaces.IJsonString;
+    JsonString  = Deltics.Json.String_.JsonString;
+
+    Json = class;
+
+    TJsonDateTimeParts = (dpYear, dpMonth, dpDay, dpTime, dpOffset);
+    TJsonDatePart = dpYear..dpDay;
+
+    TJsonValue = class;
+      TJsonBoolean = class;
+      TJsonNull = class;
+      TJsonNumber = class;
+      TJsonInteger = class;
+      TJsonString = class;
+      TJsonStructure = class;
+        TJsonArray  = class;
+        TJsonObject  = class;
 
     TJsonFormat = (jfStandard, jfCompact, jfConfig);
-//      TJSONComment = class;
+//      TJsonComment = class;
 
 
-    TJSONValueClass = class of TJSONValue;
+    TJsonValueClass = class of TJsonValue;
 
 
-    EJSONError = class(Exception);
-    EJSONStreamError = class(EJSONError);
+    EJsonError = class(Exception);
+    EJsonStreamError = class(EJsonError);
 
-    TJSONObjectComparer = function(const A, B: TJSONObject): Integer;
+    TJsonObjectComparer = function(const A, B: TJsonObject): Integer;
 
-    TJSONValueType = (jsString, jsNumber, jsBoolean, jsArray, jsObject, jsNull);
+//    TJsonValueType = (jsString, jsNumber, jsBoolean, jsArray, jsObject, jsNull);
 
 
-    JSON = class
+    Json = class
       class function DecodeDate(const aString: UnicodeString): TDateTime;
-      class function EncodeDate(const aDate: TDate; const aAccuracy: TJSONDatePart = dpDay): UnicodeString; overload;
+      class function EncodeDate(const aDate: TDate; const aAccuracy: TJsonDatePart = dpDay): UnicodeString; overload;
       class function EncodeDate(const aYear: Word): UnicodeString; overload;
       class function EncodeDate(const aYear, aMonth: Word): UnicodeString; overload;
       class function EncodeDate(const aYear, aMonth, aDay: Word): UnicodeString; overload;
       class function EncodeDateTime(const aDateTime: TDateTime): UnicodeString; overload;
-      class function EncodeDateTime(const aDateTime: TDateTime; const aDateAccuracy: TJSONDatePart): UnicodeString; overload;
+      class function EncodeDateTime(const aDateTime: TDateTime; const aDateAccuracy: TJsonDatePart): UnicodeString; overload;
       class function EncodeDateTime(const aDateTime: TDateTime; const aOffset: SmallInt): UnicodeString; overload;
-      class function EncodeDateTime(const aDateTime: TDateTime; const aDateAccuracy: TJSONDatePart; const aOffset: SmallInt): UnicodeString; overload;
+      class function EncodeDateTime(const aDateTime: TDateTime; const aDateAccuracy: TJsonDatePart; const aOffset: SmallInt): UnicodeString; overload;
       class function EncodeString(const aString: String): String;
 
-      class function ReadFromFile(const aFilename: String): TJSONValue;
-      class function ReadValue(aStream: TStream): TJSONValue; overload;
-      class function ReadValue(const aString: String): TJSONValue; overload;
+      class function ReadFromFile(const aFilename: String): TJsonValue;
+      class function ReadValue(aStream: TStream): TJsonValue; overload;
+      class function ReadValue(const aString: String): TJsonValue; overload;
     end;
 
 
-    TJSONValue = class
+    TJsonValue = class
     private
       fIsNull: Boolean;
       fName: UnicodeString;
-      fValueType: TJSONValueType;
-      function get_AsArray: TJSONArray;
+      fValueType: TJsonValueType;
+      function get_AsArray: TJsonArray;
       function get_AsBoolean: Boolean;
       function get_AsDateTime: TDateTime;
       function get_AsDouble: Double;
@@ -118,7 +138,7 @@ interface
       function get_AsGUID: TGUID;
       function get_AsInt64: Int64;
       function get_AsInteger: Integer;
-      function get_AsObject: TJSONObject;
+      function get_AsObject: TJsonObject;
       function get_AsString: UnicodeString;
       procedure set_AsBoolean(const aValue: Boolean);
       procedure set_AsDateTime(const aValue: TDateTime);
@@ -133,14 +153,14 @@ interface
       procedure DoSetAsString(const aValue: UnicodeString); virtual;
       procedure Wipe; virtual;
     protected
-      function get_AsJSON: UnicodeString; virtual;
+      function get_AsJson: UnicodeString; virtual;
     public
       constructor Create; virtual;
       procedure Clear; virtual;
-      function Clone: TJSONValue; virtual;
-      procedure CopyFrom(const aSource: TJSONValue); virtual;
-      function IsEqual(const aOther: TJSONValue): Boolean;
-      property AsArray: TJSONArray read get_AsArray;
+      function Clone: TJsonValue; virtual;
+      procedure CopyFrom(const aSource: TJsonValue); virtual;
+      function IsEqual(const aOther: TJsonValue): Boolean;
+      property AsArray: TJsonArray read get_AsArray;
       property AsBoolean: Boolean read get_AsBoolean write set_AsBoolean;
       property AsDateTime: TDateTime read get_AsDateTime write set_AsDateTime;
       property AsDouble: Double read get_AsDouble write set_AsDouble;
@@ -148,12 +168,12 @@ interface
       property AsGUID: TGUID read get_AsGUID write set_AsGUID;
       property AsInt64: Int64 read get_AsInt64 write set_AsInt64;
       property AsInteger: Integer read get_AsInteger write set_AsInteger;
-      property AsJSON: UnicodeString read get_AsJSON;
-      property AsObject: TJSONObject read get_AsObject;
+      property AsJson: UnicodeString read get_AsJson;
+      property AsObject: TJsonObject read get_AsObject;
       property AsString: UnicodeString read get_AsString write set_AsString;
       property IsNull: Boolean read get_IsNull write set_IsNull;
       property Name: UnicodeString read fName write fName;
-      property ValueType: TJSONValueType read fValueType;
+      property ValueType: TJsonValueType read fValueType;
 
     {$ifdef DELPHI2009__}
     private
@@ -168,7 +188,7 @@ interface
     end;
 
 
-      TJSONBoolean = class(TJSONValue)
+      TJsonBoolean = class(TJsonValue)
       private
         fValue: Boolean;
         procedure set_Value(const aValue: Boolean);
@@ -176,19 +196,19 @@ interface
         function DoGetAsString: UnicodeString; override;
         procedure DoSetAsString(const aValue: UnicodeString); override;
       public
-        procedure CopyFrom(const aSource: TJSONValue); override;
+        procedure CopyFrom(const aSource: TJsonValue); override;
         property Value: Boolean read fValue write set_Value;
       end;
 
-      TJSONNull = class(TJSONValue)
+      TJsonNull = class(TJsonValue)
       protected
         function get_IsNull: Boolean; override;
         function DoGetAsString: UnicodeString; override;
       end;
 
-      TJSONNumber = class(TJSONValue);
+      TJsonNumber = class(TJsonValue);
 
-        TJSONDouble = class(TJSONNumber)
+        TJsonDouble = class(TJsonNumber)
         private
           fValue: Double;
           procedure set_Value(const aValue: Double);
@@ -196,11 +216,11 @@ interface
           function DoGetAsString: UnicodeString; override;
           procedure DoSetAsString(const aValue: UnicodeString); override;
         public
-          procedure CopyFrom(const aSource: TJSONValue); override;
+          procedure CopyFrom(const aSource: TJsonValue); override;
           property Value: Double read fValue write set_Value;
         end;
 
-        TJSONInteger = class(TJSONNumber)
+        TJsonInteger = class(TJsonNumber)
         private
           fValue: Int64;
           procedure set_Value(const aValue: Int64);
@@ -208,62 +228,62 @@ interface
           function DoGetAsString: UnicodeString; override;
           procedure DoSetAsString(const aValue: UnicodeString); override;
         public
-          procedure CopyFrom(const aSource: TJSONValue); override;
+          procedure CopyFrom(const aSource: TJsonValue); override;
           property Value: Int64 read fValue write set_Value;
         end;
 
 
-      TJSONString = class(TJSONValue)
+      TJsonString = class(TJsonValue)
       private
         fValue: UnicodeString;
         procedure set_Value(const aValue: UnicodeString);
       protected
-        function get_AsJSON: UnicodeString; override;
+        function get_AsJson: UnicodeString; override;
         function DoGetAsString: UnicodeString; override;
         procedure DoSetAsString(const aValue: UnicodeString); override;
       public
         class function Decode(const aValue: UnicodeString): UnicodeString;
         class function Encode(const aValue: UnicodeString): UnicodeString;
-        procedure CopyFrom(const aSource: TJSONValue); override;
+        procedure CopyFrom(const aSource: TJsonValue); override;
         property Value: UnicodeString read fValue write set_Value;
       end;
 
 
-      TJSONStructure = class(TJSONValue)
+      TJsonStructure = class(TJsonValue)
       private
         function get_AsDisplayText: UnicodeString;
       protected
         function get_IsEmpty: Boolean; virtual; abstract;
         function get_IsNull: Boolean; override;
-        procedure Add(const aValue: TJSONValue); overload; virtual; abstract;
+        procedure Add(const aValue: TJsonValue); overload; virtual; abstract;
       public
-        class function CreateFromFile(const aFilename: UnicodeString): TJSONStructure;
-        class function CreateFromStream(const aStream: TStream): TJSONStructure; overload;
-        class function CreateFromStream(const aStream: TStream; const aDefaultEncoding: TEncoding): TJSONStructure; overload;
-        class function CreateFromANSI(const aString: ANSIString): TJSONStructure;
-        class function CreateFromUTF8(const aString: UTF8String): TJSONStructure;
-        class function CreateFromWIDE(const aString: UnicodeString): TJSONStructure;
-        class function CreateFromString(const aString: String): TJSONStructure;
-        function Add(const aName: UnicodeString; const aValue: TJSONStructure): TJSONStructure; overload;
-        function Add(const aName: UnicodeString; const aValue: Boolean): TJSONBoolean; overload;
-        function Add(const aName: UnicodeString; const aValue: Integer): TJSONInteger; overload;
-        function Add(const aName: UnicodeString; const aValue: Int64): TJSONNumber; overload;
-        function Add(const aName: UnicodeString; const aValue: UnicodeString): TJSONString; overload;
-        function Add(const aName: UnicodeString; const aValue: TGUID): TJSONString; overload;
-        function Add(const aName: UnicodeString; const aValue: Double): TJSONNumber; overload;
-        function Add(const aName: UnicodeString; const aValue: Integer; const aTypeInfo: PTypeInfo): TJSONString; overload;
+        class function CreateFromFile(const aFilename: UnicodeString): TJsonStructure;
+        class function CreateFromStream(const aStream: TStream): TJsonStructure; overload;
+        class function CreateFromStream(const aStream: TStream; const aDefaultEncoding: TEncoding): TJsonStructure; overload;
+        class function CreateFromANSI(const aString: ANSIString): TJsonStructure;
+        class function CreateFromUTF8(const aString: UTF8String): TJsonStructure;
+        class function CreateFromWIDE(const aString: UnicodeString): TJsonStructure;
+        class function CreateFromString(const aString: String): TJsonStructure;
+        function Add(const aName: UnicodeString; const aValue: TJsonStructure): TJsonStructure; overload;
+        function Add(const aName: UnicodeString; const aValue: Boolean): TJsonBoolean; overload;
+        function Add(const aName: UnicodeString; const aValue: Integer): TJsonInteger; overload;
+        function Add(const aName: UnicodeString; const aValue: Int64): TJsonNumber; overload;
+        function Add(const aName: UnicodeString; const aValue: UnicodeString): TJsonString; overload;
+        function Add(const aName: UnicodeString; const aValue: TGUID): TJsonString; overload;
+        function Add(const aName: UnicodeString; const aValue: Double): TJsonNumber; overload;
+        function Add(const aName: UnicodeString; const aValue: Integer; const aTypeInfo: PTypeInfo): TJsonString; overload;
       {$ifdef DELPHI2009__}
-        function Add(const aName: UnicodeString; const aValue: TDateTime): TJSONString; overload;
-        function Add(const aName: UnicodeString; const aValue: TDate): TJSONString; overload;
-        function Add(const aName: UnicodeString; const aValue: TTime): TJSONString; overload;
+        function Add(const aName: UnicodeString; const aValue: TDateTime): TJsonString; overload;
+        function Add(const aName: UnicodeString; const aValue: TDate): TJsonString; overload;
+        function Add(const aName: UnicodeString; const aValue: TTime): TJsonString; overload;
       {$endif}
-        function AddArray(const aName: UnicodeString = ''): TJSONArray;
-        function AddDate(const aName: UnicodeString; const aValue: TDate): TJSONString;
-        function AddTime(const aName: UnicodeString; const aValue: TTime): TJSONString;
-        function AddDateTime(const aName: UnicodeString; const aValue: TDateTime): TJSONString;
-        function AddDouble(const aName: UnicodeString; const aValue: Double): TJSONNumber;
+        function AddArray(const aName: UnicodeString = ''): TJsonArray;
+        function AddDate(const aName: UnicodeString; const aValue: TDate): TJsonString;
+        function AddTime(const aName: UnicodeString; const aValue: TTime): TJsonString;
+        function AddDateTime(const aName: UnicodeString; const aValue: TDateTime): TJsonString;
+        function AddDouble(const aName: UnicodeString; const aValue: Double): TJsonNumber;
         procedure AddNull(const aName: UnicodeString);
-        function AddObject(const aName: UnicodeString = ''): TJSONObject;
+        function AddObject(const aName: UnicodeString = ''): TJsonObject;
         procedure Load(const aSource: IUnicodeReader);
         procedure LoadFromFile(const aFileName: UnicodeString; const aEncoding: TEncoding = NIL);
         procedure LoadFromStream(const aStream: TStream; const aEncoding: TEncoding = NIL);
@@ -275,10 +295,10 @@ interface
       end;
 
 
-        TJSONArray = class(TJSONStructure)
+        TJsonArray = class(TJsonStructure)
         private
           fItems: TObjectList;
-          function get_Item(const aIndex: Integer): TJSONValue;
+          function get_Item(const aIndex: Integer): TJsonValue;
           function get_Count: Integer;
         protected
           function get_IsEmpty: Boolean; override;
@@ -287,62 +307,62 @@ interface
         public
           constructor Create; overload; override;
           destructor Destroy; override;
-          function Add(const aValue: Boolean): TJSONBoolean; reintroduce; overload;
-          function Add(const aValue: Integer): TJSONInteger; reintroduce; overload;
-          function Add(const aValue: UnicodeString): TJSONString; reintroduce; overload;
-          function Add(const aValue: TDateTime): TJSONString; reintroduce; overload;
-          function Add(const aValue: TGUID): TJSONString; reintroduce; overload;
-          function Add(const aValue: TJSONStructure): TJSONStructure; reintroduce; overload;
-          function Add(const aValue: Integer; const aTypeInfo: PTypeInfo): TJSONString; reintroduce; overload;
+          function Add(const aValue: Boolean): TJsonBoolean; reintroduce; overload;
+          function Add(const aValue: Integer): TJsonInteger; reintroduce; overload;
+          function Add(const aValue: UnicodeString): TJsonString; reintroduce; overload;
+          function Add(const aValue: TDateTime): TJsonString; reintroduce; overload;
+          function Add(const aValue: TGUID): TJsonString; reintroduce; overload;
+          function Add(const aValue: TJsonStructure): TJsonStructure; reintroduce; overload;
+          function Add(const aValue: Integer; const aTypeInfo: PTypeInfo): TJsonString; reintroduce; overload;
           procedure Add(const aValues: IStringList); reintroduce; overload;
-          procedure Add(const aValue: TJSONValue); override;
-          function AddArray: TJSONArray; reintroduce;
+          procedure Add(const aValue: TJsonValue); override;
+          function AddArray: TJsonArray; reintroduce;
           procedure AddNull; reintroduce;
-          function AddObject(const aTemplate: TJSONObject = NIL): TJSONObject; reintroduce;
+          function AddObject(const aTemplate: TJsonObject = NIL): TJsonObject; reintroduce;
           function AsStringArray: TStringArray;
           procedure Clear; override;
-          function Clone: TJSONArray; reintroduce;
-          procedure Combine(const aSource: TJSONArray);
-          procedure CopyFrom(const aSource: TJSONValue); override;
+          function Clone: TJsonArray; reintroduce;
+          procedure Combine(const aSource: TJsonArray);
+          procedure CopyFrom(const aSource: TJsonValue); override;
           procedure Delete(const aIndex: Integer); overload;
-          procedure Delete(const aValue: TJSONValue); overload;
-          function FindObject(const aValueName: UnicodeString; const aValue: TGUID; var aObject: TJSONObject): Boolean;
+          procedure Delete(const aValue: TJsonValue); overload;
+          function FindObject(const aValueName: UnicodeString; const aValue: TGUID; var aObject: TJsonObject): Boolean;
           procedure GetStrings(const aList: TStringList);
-          procedure Sort(const aComparer: TJSONObjectComparer);
+          procedure Sort(const aComparer: TJsonObjectComparer);
           procedure Wipe; override;
           property Count: Integer read get_Count;
-          property Items[const aIndex: Integer]: TJSONValue read get_Item; default;
+          property Items[const aIndex: Integer]: TJsonValue read get_Item; default;
         end;
 
 
-        TJSONObject = class(TJSONStructure)
+        TJsonObject = class(TJsonStructure)
         private
           fValues: TObjectList;
-          function get_Value(const aName: UnicodeString): TJSONValue;
+          function get_Value(const aName: UnicodeString): TJsonValue;
           function get_ValueCount: Integer;
-          function get_ValueByIndex(const aIndex: Integer): TJSONValue;
+          function get_ValueByIndex(const aIndex: Integer): TJsonValue;
         protected
           function get_IsEmpty: Boolean; override;
-          procedure Add(const aValue: TJSONValue); override;
+          procedure Add(const aValue: TJsonValue); override;
           function DoGetAsString: UnicodeString; override;
           procedure DoSetAsString(const aValue: UnicodeString); override;
         public
-          class function TryCreate(const aString: UnicodeString): TJSONObject;
+          class function TryCreate(const aString: UnicodeString): TJsonObject;
           constructor Create; overload; override;
           constructor Create(const aString: UnicodeString); reintroduce; overload;
           constructor CreateFromFile(const aFilename: UnicodeString; const aEncoding: TEncoding);
           destructor Destroy; override;
-          function AddAfter(const aPredecessor: UnicodeString; const aName: UnicodeString; const aValue: UnicodeString): TJSONString; overload;
+          function AddAfter(const aPredecessor: UnicodeString; const aName: UnicodeString; const aValue: UnicodeString): TJsonString; overload;
           procedure Clear; override;
-          function Clone: TJSONObject; reintroduce;
-          procedure Combine(const aObject: TJSONObject);
+          function Clone: TJsonObject; reintroduce;
+          procedure Combine(const aObject: TJsonObject);
           function Contains(const aValueName: UnicodeString): Boolean; overload;
           function Contains(const aValueName: UnicodeString; var aValue: UnicodeString): Boolean; overload;
-          function Contains(const aValueName: UnicodeString; var aValue: TJSONArray): Boolean; overload;
+          function Contains(const aValueName: UnicodeString; var aValue: TJsonArray): Boolean; overload;
           function Contains(const aValueName: UnicodeString; var aValue: TWIDEStringArray): Boolean; overload;
           procedure Delete(const aValueName: UnicodeString); overload;
-          function FindValue(const aName: UnicodeString): TJSONValue;
-          procedure CopyFrom(const aSource: TJSONValue); override;
+          function FindValue(const aName: UnicodeString): TJsonValue;
+          procedure CopyFrom(const aSource: TJsonValue); override;
           procedure LoadFromStream(const aStream: TStream; const aEncoding: TEncoding = NIL);
           function OptBoolean(const aName: UnicodeString; const aDefault: Boolean = FALSE): Boolean;
           function OptDateTime(const aName: UnicodeString; const aDefault: TDateTime = 0): TDateTime;
@@ -355,12 +375,12 @@ interface
           function OptTime(const aName: UnicodeString; const aDefault: TTime = 0): TTime;
         {$endif}
           property ValueCount: Integer read get_ValueCount;
-          property Values[const aName: UnicodeString]: TJSONValue read get_Value; default;
-          property ValueByIndex[const aIndex: Integer]: TJSONValue read get_ValueByIndex;
+          property Values[const aName: UnicodeString]: TJsonValue read get_Value; default;
+          property ValueByIndex[const aIndex: Integer]: TJsonValue read get_ValueByIndex;
         end;
 
 
-    TJSONReader = class
+    TJsonReader = class
     private
       fSource: IUnicodeReader;
       function EOF: Boolean;
@@ -372,9 +392,9 @@ interface
       function ReadString(const aQuoted: Boolean = TRUE): UnicodeString;
     public
       constructor Create(const aSource: IUnicodeReader);
-      function ReadArray: TJSONArray;
-      function ReadObject: TJSONObject;
-      function ReadValue: TJSONValue;
+      function ReadArray: TJsonArray;
+      function ReadObject: TJsonObject;
+      function ReadValue: TJsonValue;
     end;
 
 
@@ -405,7 +425,7 @@ implementation
 
 
 
-  class function JSON.DecodeDate(const aString: UnicodeString): TDateTime;
+  class function Json.DecodeDate(const aString: UnicodeString): TDateTime;
 
     function Pop(var S: String;
                  const aLen: Integer;
@@ -430,7 +450,7 @@ implementation
       //
       // If the string is shorter than the required value or if the determined
       //  next character is not one of the expected, valid next characters then
-      //  the string is not a valid JSON encoded date.
+      //  the string is not a valid Json encoded date.
 
       if (Length(S) > aLen) then
         nextChar := ANSIChar(S[aLen + 1])
@@ -440,7 +460,7 @@ implementation
       ok := ok and (nextChar in aValidNextChars);
 
       if NOT ok then
-        raise EJSONError.Create('''' + aString + ''' is not a valid JSON date/time');
+        raise EJsonError.Create('''' + aString + ''' is not a valid Json date/time');
 
       result := StrToInt(Copy(S, 1, aLen));
       Delete(S, 1, aLen);
@@ -512,8 +532,8 @@ implementation
   end;
 
 
-  class function JSON.EncodeDate(const aDate: TDate;
-                                 const aAccuracy: TJSONDatePart): UnicodeString;
+  class function Json.EncodeDate(const aDate: TDate;
+                                 const aAccuracy: TJsonDatePart): UnicodeString;
   begin
     case aAccuracy of
       dpYear  : result := FormatDateTime('yyyy', aDate);
@@ -523,46 +543,46 @@ implementation
   end;
 
 
-  class function JSON.EncodeDate(const aYear: Word): UnicodeString;
+  class function Json.EncodeDate(const aYear: Word): UnicodeString;
   begin
     result := WIDE.PadLeft(aYear, 4, '0');
   end;
 
 
-  class function JSON.EncodeDate(const aYear, aMonth: Word): UnicodeString;
+  class function Json.EncodeDate(const aYear, aMonth: Word): UnicodeString;
   begin
     result := self.EncodeDate(aYear) + '-' + WIDE.PadLeft(aMonth, 2, '0');
   end;
 
 
-  class function JSON.EncodeDate(const aYear, aMonth, aDay: Word): UnicodeString;
+  class function Json.EncodeDate(const aYear, aMonth, aDay: Word): UnicodeString;
   begin
     result := self.EncodeDate(aYear, aMonth) + '-' + WIDE.PadLeft(aDay, 2, '0');
   end;
 
 
-  class function JSON.EncodeDateTime(const aDateTime: TDateTime): UnicodeString;
+  class function Json.EncodeDateTime(const aDateTime: TDateTime): UnicodeString;
   begin
     result := EncodeDateTime(aDateTime, dpDay);
   end;
 
 
-  class function JSON.EncodeDateTime(const aDateTime: TDateTime;
-                                     const aDateAccuracy: TJSONDatePart): UnicodeString;
+  class function Json.EncodeDateTime(const aDateTime: TDateTime;
+                                     const aDateAccuracy: TJsonDatePart): UnicodeString;
   begin
     result := EncodeDate(aDateTime, aDateAccuracy) + 'T' + FormatDateTime('HH:nn:ss.zzz', aDateTime);
   end;
 
 
-  class function JSON.EncodeDateTime(const aDateTime: TDateTime;
+  class function Json.EncodeDateTime(const aDateTime: TDateTime;
                                      const aOffset: SmallInt): UnicodeString;
   begin
     result := EncodeDateTime(aDateTime, dpDay, aOffset);
   end;
 
 
-  class function JSON.EncodeDateTime(const aDateTime: TDateTime;
-                                     const aDateAccuracy: TJSONDatePart;
+  class function Json.EncodeDateTime(const aDateTime: TDateTime;
+                                     const aDateAccuracy: TJsonDatePart;
                                      const aOffset: SmallInt): UnicodeString;
   const
     SIGN: array[FALSE..TRUE] of String = ('-', '+');
@@ -585,13 +605,13 @@ implementation
 
 
 
-  class function JSON.EncodeString(const aString: String): String;
+  class function Json.EncodeString(const aString: String): String;
   begin
-    result := TJSONString.Encode(aString);
+    result := TJsonString.Encode(aString);
   end;
 
 
-  class function JSON.ReadFromFile(const aFilename: String): TJSONValue;
+  class function Json.ReadFromFile(const aFilename: String): TJsonValue;
   var
     src: TFileStream;
   begin
@@ -604,7 +624,7 @@ implementation
 
       except
         raise;
-//        raise Exception.CreateFmt(' JSON in file ''%s''', [aFilename]);
+//        raise Exception.CreateFmt(' Json in file ''%s''', [aFilename]);
       end;
 
     finally
@@ -614,18 +634,18 @@ implementation
 
 
 
-  class function JSON.ReadValue(aStream: TStream): TJSONValue;
+  class function Json.ReadValue(aStream: TStream): TJsonValue;
   var
     unicode: IUnicodeReader;
   begin
     unicode := TUnicodeReader.Create(aStream, TEncoding.Utf8);
 
-    with TJSONReader.Create(unicode) do
+    with TJsonReader.Create(unicode) do
     try
       result := ReadValue;
       try
         if NOT EOF and (NextRealChar <> #0) then
-          raise EJSONStreamError.Create('Unexpected data');
+          raise EJsonStreamError.Create('Unexpected data');
 
       except
         result.Free;
@@ -639,18 +659,18 @@ implementation
 
 
 
-  class function JSON.ReadValue(const aString: String): TJSONValue;
+  class function Json.ReadValue(const aString: String): TJsonValue;
   var
     unicode: IUnicodeReader;
   begin
     unicode := TUnicodeReader.Create(aString);
 
-    with TJSONReader.Create(unicode) do
+    with TJsonReader.Create(unicode) do
     try
       result := ReadValue;
       try
         if NOT EOF and (NextRealChar <> #0) then
-          raise EJSONStreamError.Create('Unexpected data');
+          raise EJsonStreamError.Create('Unexpected data');
 
       except
         result.Free;
@@ -670,48 +690,48 @@ implementation
 
 
 
-{ TJSONValue ------------------------------------------------------------------------------------- }
+{ TJsonValue ------------------------------------------------------------------------------------- }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  constructor TJSONValue.Create;
+  constructor TJsonValue.Create;
   begin
     inherited Create;
 
-    if      (self is TJSONArray)   then  fValueType := jsArray
-    else if (self is TJSONString)  then  fValueType := jsString
-    else if (self is TJSONBoolean) then  fValueType := jsBoolean
-    else if (self is TJSONNull)    then  fValueType := jsNull
-    else if (self is TJSONNumber)  then  fValueType := jsNumber
-    else if (self is TJSONObject)  then  fValueType := jsObject
+    if      (self is TJsonArray)   then  fValueType := jsArray
+    else if (self is TJsonString)  then  fValueType := jsString
+    else if (self is TJsonBoolean) then  fValueType := jsBoolean
+    else if (self is TJsonNull)    then  fValueType := jsNull
+    else if (self is TJsonNumber)  then  fValueType := jsNumber
+    else if (self is TJsonObject)  then  fValueType := jsObject
     else
-      raise EJSONError.Create('Unknown JSON value class');
+      raise EJsonError.Create('Unknown Json value class');
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.DoSetAsString(const aValue: UnicodeString);
+  procedure TJsonValue.DoSetAsString(const aValue: UnicodeString);
   begin
     fIsNull := FALSE;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.Clear;
+  procedure TJsonValue.Clear;
   begin
     fIsNull  := TRUE;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.Clone: TJSONValue;
+  function TJsonValue.Clone: TJsonValue;
   begin
-    result := TJSONValueClass(ClassType).Create;
+    result := TJsonValueClass(ClassType).Create;
     result.CopyFrom(self);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.CopyFrom(const aSource: TJSONValue);
+  procedure TJsonValue.CopyFrom(const aSource: TJsonValue);
   begin
     fIsNull  := aSource.fIsNull;
     fName    := aSource.fName;
@@ -719,31 +739,31 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.Wipe;
+  procedure TJsonValue.Wipe;
   begin
     Clear;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsArray: TJSONArray;
+  function TJsonValue.get_AsArray: TJsonArray;
   begin
-    result := self as TJSONArray;
+    result := self as TJsonArray;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsBoolean: Boolean;
+  function TJsonValue.get_AsBoolean: Boolean;
   begin
     if Assigned(self) and NOT IsNull then
     begin
-      if NOT (self is TJSONBoolean) then
+      if NOT (self is TJsonBoolean) then
       begin
         ASSERT(ValueType = jsString);
         result := SameText(AsString, 'true');
       end
       else
-        result := TJSONBoolean(self).Value;
+        result := TJsonBoolean(self).Value;
     end
     else
       result := FALSE;
@@ -751,12 +771,12 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsDateTime: TDateTime;
+  function TJsonValue.get_AsDateTime: TDateTime;
   begin
     if NOT IsNull then
     begin
       ASSERT(ValueType = jsString);
-      result := JSON.DecodeDate(AsString)
+      result := Json.DecodeDate(AsString)
     end
     else
       result := NULLDATE;
@@ -764,7 +784,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsDouble: Double;
+  function TJsonValue.get_AsDouble: Double;
   begin
     if NOT IsNull then
     begin
@@ -777,7 +797,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsEnum(const aTypeInfo: PTypeInfo): Integer;
+  function TJsonValue.get_AsEnum(const aTypeInfo: PTypeInfo): Integer;
   begin
     if NOT IsNull then
     begin
@@ -790,7 +810,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsGUID: TGUID;
+  function TJsonValue.get_AsGUID: TGUID;
   begin
     if NOT IsNull then
     begin
@@ -803,70 +823,70 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsInt64: Int64;
+  function TJsonValue.get_AsInt64: Int64;
   begin
     if IsNull then
-      raise EJSONError.CreateFmt('Cannot convert null value ''%s'' to integer', [Name]);
+      raise EJsonError.CreateFmt('Cannot convert null value ''%s'' to integer', [Name]);
 
     case ValueType of
       jsBoolean : result := Ord(AsBoolean);
       jsNumber,
       jsString  : result := StrToInt64(DoGetAsString);
     else
-      raise EJSONError.CreateFmt('Cannot convert value ''%s'' to integer', [Name]);
+      raise EJsonError.CreateFmt('Cannot convert value ''%s'' to integer', [Name]);
     end;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsInteger: Integer;
+  function TJsonValue.get_AsInteger: Integer;
   begin
     if IsNull then
-      raise EJSONError.CreateFmt('Cannot convert null value ''%s'' to integer', [Name]);
+      raise EJsonError.CreateFmt('Cannot convert null value ''%s'' to integer', [Name]);
 
     case ValueType of
       jsBoolean : result := Ord(AsBoolean);
       jsNumber,
       jsString  : result := StrToInt(DoGetAsString);
     else
-      raise EJSONError.CreateFmt('Cannot convert value ''%s'' to integer', [Name]);
+      raise EJsonError.CreateFmt('Cannot convert value ''%s'' to integer', [Name]);
     end;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsJSON: UnicodeString;
+  function TJsonValue.get_AsJson: UnicodeString;
   begin
     result := DoGetAsString;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsObject: TJSONObject;
+  function TJsonValue.get_AsObject: TJsonObject;
   begin
-    result := self as TJSONObject;
+    result := self as TJsonObject;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsString: UnicodeString;
+  function TJsonValue.get_AsString: UnicodeString;
   begin
     if IsNull then
-      raise EJSONError.CreateFmt('Cannot convert null value ''%s'' to UnicodeString', [Name])
+      raise EJsonError.CreateFmt('Cannot convert null value ''%s'' to UnicodeString', [Name])
     else
       result := DoGetAsString;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_IsNull: Boolean;
+  function TJsonValue.get_IsNull: Boolean;
   begin
     result := fIsNull;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.IsEqual(const aOther: TJSONValue): Boolean;
+  function TJsonValue.IsEqual(const aOther: TJsonValue): Boolean;
   begin
     result := (ValueType = aOther.ValueType)
               and (Name = aOther.Name)
@@ -875,7 +895,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_AsBoolean(const aValue: Boolean);
+  procedure TJsonValue.set_AsBoolean(const aValue: Boolean);
   begin
     case aValue of
       TRUE  : AsString := 'true';
@@ -885,21 +905,21 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_AsDateTime(const aValue: TDateTime);
+  procedure TJsonValue.set_AsDateTime(const aValue: TDateTime);
   begin
     AsString := DateTimeToISO8601(aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_AsDouble(const aValue: Double);
+  procedure TJsonValue.set_AsDouble(const aValue: Double);
   begin
     AsString := FloatToStr(aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_AsGUID(const aValue: TGUID);
+  procedure TJsonValue.set_AsGUID(const aValue: TGUID);
   begin
     ASSERT(ValueType = jsString);
 
@@ -908,28 +928,28 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_AsInt64(const aValue: Int64);
+  procedure TJsonValue.set_AsInt64(const aValue: Int64);
   begin
     DoSetAsString(IntToStr(aValue));
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_AsInteger(const aValue: Integer);
+  procedure TJsonValue.set_AsInteger(const aValue: Integer);
   begin
     DoSetAsString(IntToStr(aValue));
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_AsString(const aValue: UnicodeString);
+  procedure TJsonValue.set_AsString(const aValue: UnicodeString);
   begin
     DoSetAsString(aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_IsNull(const aValue: Boolean);
+  procedure TJsonValue.set_IsNull(const aValue: Boolean);
   begin
     fIsNull := aValue;
   end;
@@ -938,7 +958,7 @@ implementation
 
 {$ifdef DELPHI2009__}
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsDate: TDate;
+  function TJsonValue.get_AsDate: TDate;
   begin
     if NOT IsNull then
     begin
@@ -951,7 +971,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONValue.get_AsTime: TTime;
+  function TJsonValue.get_AsTime: TTime;
   begin
     if NOT IsNull then
     begin
@@ -964,14 +984,14 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_AsDate(const aValue: TDate);
+  procedure TJsonValue.set_AsDate(const aValue: TDate);
   begin
     AsString := DateTimeToISO8601(aValue, [dtDate]);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONValue.set_AsTime(const aValue: TTime);
+  procedure TJsonValue.set_AsTime(const aValue: TTime);
   begin
     AsString := DateTimeToISO8601(aValue, [dtTime]);
   end;
@@ -987,10 +1007,10 @@ implementation
 
 
 
-{ TJSONText -------------------------------------------------------------------------------------- }
+{ TJsonText -------------------------------------------------------------------------------------- }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONStructure.CreateFromFile(const aFilename: UnicodeString): TJSONStructure;
+  class function TJsonStructure.CreateFromFile(const aFilename: UnicodeString): TJsonStructure;
   var
     fileStream: TFileStream;
     stream: IStreamReader;
@@ -1007,15 +1027,15 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONStructure.CreateFromStream(const aStream: TStream): TJSONStructure;
+  class function TJsonStructure.CreateFromStream(const aStream: TStream): TJsonStructure;
   var
     source: IUnicodeReader;
-    reader: TJSONReader;
+    reader: TJsonReader;
   begin
     source := TUnicodeReader.Create(aStream, TEncoding.Utf8);
-    reader := TJSONReader.Create(source);
+    reader := TJsonReader.Create(source);
     try
-      result := reader.ReadValue as TJSONStructure;
+      result := reader.ReadValue as TJsonStructure;
 
     finally
       reader.Free;
@@ -1024,16 +1044,16 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONStructure.CreateFromStream(const aStream: TStream;
-                                                 const aDefaultEncoding: TEncoding): TJSONStructure;
+  class function TJsonStructure.CreateFromStream(const aStream: TStream;
+                                                 const aDefaultEncoding: TEncoding): TJsonStructure;
   var
     source: IUnicodeReader;
-    reader: TJSONReader;
+    reader: TJsonReader;
   begin
     source := TUnicodeReader.Create(aStream, aDefaultEncoding);
-    reader := TJSONReader.Create(source);
+    reader := TJsonReader.Create(source);
     try
-      result := reader.ReadValue as TJSONStructure;
+      result := reader.ReadValue as TJsonStructure;
 
     finally
       reader.Free;
@@ -1042,16 +1062,16 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONStructure.CreateFromANSI(const aString: ANSIString): TJSONStructure;
+  class function TJsonStructure.CreateFromANSI(const aString: ANSIString): TJsonStructure;
   var
     source: IUnicodeReader;
-    reader: TJSONReader;
+    reader: TJsonReader;
   begin
     source := TUnicodeReader.Create(aString);
 
-    reader := TJSONReader.Create(source);
+    reader := TJsonReader.Create(source);
     try
-      result := reader.ReadValue as TJSONStructure;
+      result := reader.ReadValue as TJsonStructure;
 
     finally
       reader.Free;
@@ -1060,16 +1080,16 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONStructure.CreateFromUTF8(const aString: UTF8String): TJSONStructure;
+  class function TJsonStructure.CreateFromUTF8(const aString: UTF8String): TJsonStructure;
   var
     source: IUnicodeReader;
-    reader: TJSONReader;
+    reader: TJsonReader;
   begin
     source := TUnicodeReader.Create(aString);
 
-    reader := TJSONReader.Create(source);
+    reader := TJsonReader.Create(source);
     try
-      result := reader.ReadValue as TJSONStructure;
+      result := reader.ReadValue as TJsonStructure;
 
     finally
       reader.Free;
@@ -1078,16 +1098,16 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONStructure.CreateFromWIDE(const aString: UnicodeString): TJSONStructure;
+  class function TJsonStructure.CreateFromWIDE(const aString: UnicodeString): TJsonStructure;
   var
     source: IUnicodeReader;
-    reader: TJSONReader;
+    reader: TJsonReader;
   begin
     source := TUnicodeReader.Create(aString);
 
-    reader := TJSONReader.Create(source);
+    reader := TJsonReader.Create(source);
     try
-      result := reader.ReadValue as TJSONStructure;
+      result := reader.ReadValue as TJsonStructure;
 
     finally
       reader.Free;
@@ -1096,7 +1116,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONStructure.CreateFromString(const aString: String): TJSONStructure;
+  class function TJsonStructure.CreateFromString(const aString: String): TJsonStructure;
   begin
   {$ifdef UNICODE}
     result := CreateFromWIDE(aString);
@@ -1107,16 +1127,16 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.get_AsDisplayText: UnicodeString;
+  function TJsonStructure.get_AsDisplayText: UnicodeString;
 
-    function ObjectToString(const aObject: TJSONObject;
+    function ObjectToString(const aObject: TJsonObject;
                             const aIndent: Integer): UnicodeString; forward;
 
-    function ArrayToString(const aArray: TJSONArray;
+    function ArrayToString(const aArray: TJsonArray;
                            const aIndent: Integer): UnicodeString;
     var
       i: Integer;
-      item: TJSONValue;
+      item: TJsonValue;
     begin
       if (aArray.Count = 0) then
       begin
@@ -1136,9 +1156,9 @@ implementation
 
           if NOT item.IsNull then
             case item.ValueType of
-              jsString  : result := result + TJSONString.Encode(item.AsString);
-              jsArray   : result := result + '  ' + ArrayToString(item as TJSONArray, aIndent + 2);
-              jsObject  : result := result + '  ' + ObjectToString(item as TJSONObject, aIndent + 2);
+              jsString  : result := result + TJsonString.Encode(item.AsString);
+              jsArray   : result := result + '  ' + ArrayToString(item as TJsonArray, aIndent + 2);
+              jsObject  : result := result + '  ' + ObjectToString(item as TJsonObject, aIndent + 2);
             else
               result := result + item.AsString;
             end
@@ -1154,11 +1174,11 @@ implementation
       result := result + #13#10 + StringOfChar(' ', aIndent) + ']';
     end;
 
-    function ObjectToString(const aObject: TJSONObject;
+    function ObjectToString(const aObject: TJsonObject;
                             const aIndent: Integer): UnicodeString;
     var
       i: Integer;
-      value: TJSONValue;
+      value: TJsonValue;
     begin
       if (aObject.ValueCount = 0) then
       begin
@@ -1174,15 +1194,15 @@ implementation
         begin
           value := aObject.ValueByIndex[i];
 
-          result := result + StringOfChar(' ', aIndent + 2) + TJSONString.Encode(value.Name) + ':';
+          result := result + StringOfChar(' ', aIndent + 2) + TJsonString.Encode(value.Name) + ':';
 
           if value.IsNull then
             result := result + 'null'
           else
             case value.ValueType of
-              jsString  : result := result + TJSONString.Encode(value.AsString);
-              jsArray   : result := result + ArrayToString(value as TJSONArray, aIndent + Length(value.Name) + 5);
-              jsObject  : result := result + ObjectToString(value as TJSONObject, aIndent + Length(value.Name) + 5);
+              jsString  : result := result + TJsonString.Encode(value.AsString);
+              jsArray   : result := result + ArrayToString(value as TJsonArray, aIndent + Length(value.Name) + 5);
+              jsObject  : result := result + ObjectToString(value as TJsonObject, aIndent + Length(value.Name) + 5);
             else
               result := result + value.AsString;
             end;
@@ -1198,25 +1218,25 @@ implementation
 
   begin
     case ValueType of
-      jsArray   : result := ArrayToString(TJSONArray(self), 0);
-      jsObject  : result := ObjectToString(TJSONObject(self), 0);
+      jsArray   : result := ArrayToString(TJsonArray(self), 0);
+      jsObject  : result := ObjectToString(TJsonObject(self), 0);
     else
-      result := 'Not a JSON text Value';
+      result := 'Not a Json text Value';
     end;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.get_IsNull: Boolean;
+  function TJsonStructure.get_IsNull: Boolean;
   begin
     result := FALSE;  // Arrays and objects are never NULL (not even when empty)
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString; const aValue: Boolean): TJSONBoolean;
+  function TJsonStructure.Add(const aName: UnicodeString; const aValue: Boolean): TJsonBoolean;
   begin
-    result := TJSONBoolean.Create;
+    result := TJsonBoolean.Create;
     result.Name   := aName;
     result.Value  := aValue;
 
@@ -1225,9 +1245,9 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString; const aValue: Integer): TJSONInteger;
+  function TJsonStructure.Add(const aName: UnicodeString; const aValue: Integer): TJsonInteger;
   begin
-    result := TJSONInteger.Create;
+    result := TJsonInteger.Create;
     result.Name  := aName;
     result.Value := aValue;
 
@@ -1236,9 +1256,9 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName, aValue: UnicodeString): TJSONString;
+  function TJsonStructure.Add(const aName, aValue: UnicodeString): TJsonString;
   begin
-    result := TJSONString.Create;
+    result := TJsonString.Create;
     result.Name  := aName;
     result.Value := aValue;
 
@@ -1247,8 +1267,8 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.AddDate(const aName: UnicodeString;
-                             const aValue: TDate): TJSONString;
+  function TJsonStructure.AddDate(const aName: UnicodeString;
+                             const aValue: TDate): TJsonString;
   {
     Cannot simply overload Double/TDateTime if we wish to support earlier Delphi
      compilers as there is a bug in the compiler that considers Double/TDateTime
@@ -1256,10 +1276,10 @@ implementation
 
     Instead we have to provide this protected method specifically for adding
      TDateTime values - the Add(name, TDateTime) method calls this protected
-     method as does the override in TJSONArray.
+     method as does the override in TJsonArray.
   }
   begin
-    result := TJSONString.Create;
+    result := TJsonString.Create;
     result.Name := aName;
 
     if (aValue <> NULLDATE) then
@@ -1272,8 +1292,8 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.AddTime(const aName: UnicodeString;
-                             const aValue: TTime): TJSONString;
+  function TJsonStructure.AddTime(const aName: UnicodeString;
+                             const aValue: TTime): TJsonString;
   {
     Cannot simply overload Double/TDateTime if we wish to support earlier Delphi
      compilers as there is a bug in the compiler that considers Double/TDateTime
@@ -1281,10 +1301,10 @@ implementation
 
     Instead we have to provide this protected method specifically for adding
      TDateTime values - the Add(name, TDateTime) method calls this protected
-     method as does the override in TJSONArray.
+     method as does the override in TJsonArray.
   }
   begin
-    result := TJSONString.Create;
+    result := TJsonString.Create;
     result.Name := aName;
 
     if (aValue <> NULLDATE) then
@@ -1297,8 +1317,8 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.AddDateTime(const aName: UnicodeString;
-                                      const aValue: TDateTime): TJSONString;
+  function TJsonStructure.AddDateTime(const aName: UnicodeString;
+                                      const aValue: TDateTime): TJsonString;
   {
     Cannot simply overload Double/TDateTime if we wish to support earlier Delphi
      compilers as there is a bug in the compiler that considers Double/TDateTime
@@ -1306,10 +1326,10 @@ implementation
 
     Instead we have to provide this protected method specifically for adding
      TDateTime values - the Add(name, TDateTime) method calls this protected
-     method as does the override in TJSONArray.
+     method as does the override in TJsonArray.
   }
   begin
-    result := TJSONString.Create;
+    result := TJsonString.Create;
     result.Name := aName;
 
     if (aValue <> NULLDATE) then
@@ -1322,8 +1342,8 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.AddDouble(const aName: UnicodeString;
-                                    const aValue: Double): TJSONNumber;
+  function TJsonStructure.AddDouble(const aName: UnicodeString;
+                                    const aValue: Double): TJsonNumber;
   {
     Cannot simply overload Double/TDateTime if we wish to support earlier Delphi
      compilers as there is a bug in the compiler that considers Double/TDateTime
@@ -1331,13 +1351,13 @@ implementation
 
     Instead we have to provide this protected method specifically for adding
      TDateTime values - the Add(name, TDateTime) method calls this protected
-     method as does the override in TJSONArray.
+     method as does the override in TJsonArray.
   }
   begin
-    result := TJSONDouble.Create;
+    result := TJsonDouble.Create;
     result.Name := aName;
 
-    TJSONDouble(result).Value  := aValue;
+    TJsonDouble(result).Value  := aValue;
 
     Add(result);
   end;
@@ -1345,10 +1365,10 @@ implementation
 
 {$ifdef DELPHI2009__}
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString;
-                         const aValue: TDate): TJSONString;
+  function TJsonStructure.Add(const aName: UnicodeString;
+                         const aValue: TDate): TJsonString;
   begin
-    result := TJSONString.Create;
+    result := TJsonString.Create;
     result.Name := aName;
 
     if (aValue <> NULLDATE) then
@@ -1361,10 +1381,10 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString;
-                              const aValue: TTime): TJSONString;
+  function TJsonStructure.Add(const aName: UnicodeString;
+                              const aValue: TTime): TJsonString;
   begin
-    result := TJSONString.Create;
+    result := TJsonString.Create;
     result.Name := aName;
 
     if (aValue <> NULLDATE) then
@@ -1377,8 +1397,8 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString;
-                              const aValue: TDateTime): TJSONString;
+  function TJsonStructure.Add(const aName: UnicodeString;
+                              const aValue: TDateTime): TJsonString;
   begin
     result := AddDateTime(aName, aValue);
   end;
@@ -1386,10 +1406,10 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString;
-                              const aValue: TGUID): TJSONString;
+  function TJsonStructure.Add(const aName: UnicodeString;
+                              const aValue: TGUID): TJsonString;
   begin
-    result := TJSONString.Create;
+    result := TJsonString.Create;
     result.Name  := aName;
 
     if NOT SameGUID(aValue, NULLGUID) then
@@ -1402,84 +1422,84 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString;
+  function TJsonStructure.Add(const aName: UnicodeString;
                          const aValue: Integer;
-                         const aTypeInfo: PTypeInfo): TJSONString;
+                         const aTypeInfo: PTypeInfo): TJsonString;
   begin
     result := Add(aName, GetEnumName(aTypeInfo, aValue));
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString;
-                              const aValue: Int64): TJSONNumber;
+  function TJsonStructure.Add(const aName: UnicodeString;
+                              const aValue: Int64): TJsonNumber;
   begin
-    result := TJSONInteger.Create;
+    result := TJsonInteger.Create;
     result.Name := aName;
 
-    TJSONInteger(result).Value := aValue;
+    TJsonInteger(result).Value := aValue;
 
     Add(result);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString;
-                              const aValue: Double): TJSONNumber;
+  function TJsonStructure.Add(const aName: UnicodeString;
+                              const aValue: Double): TJsonNumber;
   begin
-    result := TJSONDouble.Create;
+    result := TJsonDouble.Create;
     result.Name := aName;
 
-    TJSONDouble(result).Value  := aValue;
+    TJsonDouble(result).Value  := aValue;
 
     Add(result);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.AddArray(const aName: UnicodeString): TJSONArray;
+  function TJsonStructure.AddArray(const aName: UnicodeString): TJsonArray;
   begin
-    result := TJSONArray.Create;
+    result := TJsonArray.Create;
     result.Name := aName;
     Add(result);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONStructure.AddNull(const aName: UnicodeString);
+  procedure TJsonStructure.AddNull(const aName: UnicodeString);
   var
-    null: TJSONValue;
+    null: TJsonValue;
   begin
-    null := TJSONNull.Create;
+    null := TJsonNull.Create;
     null.Name   := aName;
     Add(null);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.AddObject(const aName: UnicodeString): TJSONObject;
+  function TJsonStructure.AddObject(const aName: UnicodeString): TJsonObject;
   begin
-    result := TJSONObject.Create;
+    result := TJsonObject.Create;
     result.Name := aName;
     Add(result);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONStructure.Add(const aName: UnicodeString;
-                         const aValue: TJSONStructure): TJSONStructure;
+  function TJsonStructure.Add(const aName: UnicodeString;
+                         const aValue: TJsonStructure): TJsonStructure;
   begin
-    result := TJSONStructure(aValue.Clone);
+    result := TJsonStructure(aValue.Clone);
     result.Name := aName;
     Add(result);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONStructure.Load(const aSource: IUnicodeReader);
+  procedure TJsonStructure.Load(const aSource: IUnicodeReader);
   var
-    reader: TJSONReader;
-    loaded: TJSONValue;
+    reader: TJsonReader;
+    loaded: TJsonValue;
   begin
     reader := NIL;
     loaded := NIL;
@@ -1488,7 +1508,7 @@ implementation
 
       if NOT aSource.EOF then
       begin
-        reader := TJSONReader.Create(aSource);
+        reader := TJsonReader.Create(aSource);
         loaded := reader.ReadValue;
 
         if Assigned(loaded) then
@@ -1502,7 +1522,7 @@ implementation
   end;
 
 
-  procedure TJSONStructure.LoadFromFile(const aFileName: UnicodeString;
+  procedure TJsonStructure.LoadFromFile(const aFileName: UnicodeString;
                                         const aEncoding: TEncoding);
   var
     stream: TFileStream;
@@ -1516,7 +1536,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONStructure.LoadFromStream(const aStream: TStream;
+  procedure TJsonStructure.LoadFromStream(const aStream: TStream;
                                           const aEncoding: TEncoding);
   var
     reader: IUnicodeReader;
@@ -1527,7 +1547,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONStructure.SaveToFile(const aFileName: UnicodeString;
+  procedure TJsonStructure.SaveToFile(const aFileName: UnicodeString;
                                       const aFormat: TJsonFormat);
   var
     stream: TMemoryStream;
@@ -1545,7 +1565,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONStructure.SaveToStream(const aStream: TStream;
+  procedure TJsonStructure.SaveToStream(const aStream: TStream;
                                         const aFormat: TJsonFormat);
   var
     s: UTF8String;
@@ -1563,10 +1583,10 @@ implementation
 
 
 
-{ TJSONArray ------------------------------------------------------------------------------------- }
+{ TJsonArray ------------------------------------------------------------------------------------- }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  constructor TJSONArray.Create;
+  constructor TJsonArray.Create;
   begin
     inherited Create;
 
@@ -1575,7 +1595,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  destructor TJSONArray.Destroy;
+  destructor TJsonArray.Destroy;
   begin
     FreeAndNIL(fItems);
 
@@ -1584,56 +1604,56 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.Add(const aValue: UnicodeString): TJSONString;
+  function TJsonArray.Add(const aValue: UnicodeString): TJsonString;
   begin
     result := inherited Add('', aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.Add(const aValue: Integer): TJSONInteger;
+  function TJsonArray.Add(const aValue: Integer): TJsonInteger;
   begin
     result := inherited Add('', aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.Add(const aValue: Boolean): TJSONBoolean;
+  function TJsonArray.Add(const aValue: Boolean): TJsonBoolean;
   begin
     result := inherited Add('', aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.Add(const aValue: Integer; const aTypeInfo: PTypeInfo): TJSONString;
+  function TJsonArray.Add(const aValue: Integer; const aTypeInfo: PTypeInfo): TJsonString;
   begin
     result := inherited Add('', aValue, aTypeInfo);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.Add(const aValue: TJSONStructure): TJSONStructure;
+  function TJsonArray.Add(const aValue: TJsonStructure): TJsonStructure;
   begin
     result := inherited Add('', aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.Add(const aValue: TGUID): TJSONString;
+  function TJsonArray.Add(const aValue: TGUID): TJsonString;
   begin
     result := inherited Add('', aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.Add(const aValue: TDateTime): TJSONString;
+  function TJsonArray.Add(const aValue: TDateTime): TJsonString;
   begin
     result := inherited AddDateTime('', aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.Add(const aValue: TJSONValue);
+  procedure TJsonArray.Add(const aValue: TJsonValue);
   begin
     fIsNull := FALSE;
     fItems.Add(aValue);
@@ -1641,7 +1661,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.Add(const aValues: IStringList);
+  procedure TJsonArray.Add(const aValues: IStringList);
   var
     i: Integer;
   begin
@@ -1651,33 +1671,33 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.AddArray: TJSONArray;
+  function TJsonArray.AddArray: TJsonArray;
   begin
     result := inherited AddArray('');
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.AddNull;
+  procedure TJsonArray.AddNull;
   begin
     inherited AddNull('');
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.AddObject(const aTemplate: TJSONObject): TJSONObject;
+  function TJsonArray.AddObject(const aTemplate: TJsonObject): TJsonObject;
   begin
     if Assigned(aTemplate) then
       result := aTemplate.Clone
     else
-      result := TJSONObject.Create;
+      result := TJsonObject.Create;
 
-    Add(TJSONValue(result));
+    Add(TJsonValue(result));
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.AsStringArray: TStringArray;
+  function TJsonArray.AsStringArray: TStringArray;
   var
     i: Integer;
   begin
@@ -1689,22 +1709,22 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.Clear;
+  procedure TJsonArray.Clear;
   begin
     fItems.Clear;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.Clone: TJSONArray;
+  function TJsonArray.Clone: TJsonArray;
   begin
-    ASSERT(self is TJSONArray);
-    result := TJSONArray(inherited Clone);
+    ASSERT(self is TJsonArray);
+    result := TJsonArray(inherited Clone);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.Combine(const aSource: TJSONArray);
+  procedure TJsonArray.Combine(const aSource: TJsonArray);
   var
     i: Integer;
   begin
@@ -1714,10 +1734,10 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.CopyFrom(const aSource: TJSONValue);
+  procedure TJsonArray.CopyFrom(const aSource: TJsonValue);
   var
     i: Integer;
-    source: TJSONArray absolute aSource;
+    source: TJsonArray absolute aSource;
   begin
     inherited CopyFrom(aSource);
 
@@ -1729,24 +1749,24 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.Delete(const aIndex: Integer);
+  procedure TJsonArray.Delete(const aIndex: Integer);
   begin
     fItems.Delete(aIndex);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.Delete(const aValue: TJSONValue);
+  procedure TJsonArray.Delete(const aValue: TJsonValue);
   begin
     Delete(fItems.IndexOf(aValue));
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.DoGetAsString: UnicodeString;
+  function TJsonArray.DoGetAsString: UnicodeString;
   var
     i: Integer;
-    item: TJSONValue;
+    item: TJsonValue;
   begin
     result := '';
 
@@ -1758,7 +1778,7 @@ implementation
 
         case item.ValueType of
           jsNull    : result := result + 'null';
-          jsString  : result := result + TJSONString.Encode(item.AsString);
+          jsString  : result := result + TJsonString.Encode(item.AsString);
         else
           result := result + item.AsString;
         end;
@@ -1774,7 +1794,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.DoSetAsString(const aValue: UnicodeString);
+  procedure TJsonArray.DoSetAsString(const aValue: UnicodeString);
   var
     source: IUnicodeReader;
   begin
@@ -1784,35 +1804,35 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.get_Count: Integer;
+  function TJsonArray.get_Count: Integer;
   begin
     result := fItems.Count;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.get_IsEmpty: Boolean;
+  function TJsonArray.get_IsEmpty: Boolean;
   begin
     result := (fItems.Count = 0);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.get_Item(const aIndex: Integer): TJSONValue;
+  function TJsonArray.get_Item(const aIndex: Integer): TJsonValue;
   begin
-    result := TJSONValue(fItems[aIndex])
+    result := TJsonValue(fItems[aIndex])
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.Sort(const aComparer: TJSONObjectComparer);
+  procedure TJsonArray.Sort(const aComparer: TJsonObjectComparer);
   begin
     fItems.Sort(TListSortCompare(aComparer));
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.Wipe;
+  procedure TJsonArray.Wipe;
   var
     i: Integer;
   begin
@@ -1822,9 +1842,9 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONArray.FindObject(const aValueName: UnicodeString;
+  function TJsonArray.FindObject(const aValueName: UnicodeString;
                                  const aValue: TGUID;
-                                 var aObject: TJSONObject): Boolean;
+                                 var aObject: TJsonObject): Boolean;
   var
     i: Integer;
   begin
@@ -1836,7 +1856,7 @@ implementation
         if Items[i].ValueType <> jsObject then
           CONTINUE;
 
-        aObject := TJSONObject(Items[i]);
+        aObject := TJsonObject(Items[i]);
         if aObject.Contains(aValueName)
          and SameGUID(aObject[aValueName].AsGUID, aValue) then
           EXIT;
@@ -1851,7 +1871,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONArray.GetStrings(const aList: TStringList);
+  procedure TJsonArray.GetStrings(const aList: TStringList);
   var
     i: Integer;
   begin
@@ -1862,17 +1882,17 @@ implementation
 
 
 
-{ TJSONNull -------------------------------------------------------------------------------------- }
+{ TJsonNull -------------------------------------------------------------------------------------- }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONNull.DoGetAsString: UnicodeString;
+  function TJsonNull.DoGetAsString: UnicodeString;
   begin
     result := 'null';
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONNull.get_IsNull: Boolean;
+  function TJsonNull.get_IsNull: Boolean;
   begin
     result := TRUE;
   end;
@@ -1883,10 +1903,10 @@ implementation
 
 
 
-{ TJSONBoolean ----------------------------------------------------------------------------------- }
+{ TJsonBoolean ----------------------------------------------------------------------------------- }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONBoolean.set_Value(const aValue: Boolean);
+  procedure TJsonBoolean.set_Value(const aValue: Boolean);
   begin
     IsNull := FALSE;
     fValue := aValue;
@@ -1894,16 +1914,16 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONBoolean.CopyFrom(const aSource: TJSONValue);
+  procedure TJsonBoolean.CopyFrom(const aSource: TJsonValue);
   begin
     inherited CopyFrom(aSource);
 
-    fValue := TJSONBoolean(aSource).fValue;
+    fValue := TJsonBoolean(aSource).fValue;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONBoolean.DoGetAsString: UnicodeString;
+  function TJsonBoolean.DoGetAsString: UnicodeString;
   begin
     case fValue of
       TRUE  : result := 'true';
@@ -1913,7 +1933,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONBoolean.DoSetAsString(const aValue: UnicodeString);
+  procedure TJsonBoolean.DoSetAsString(const aValue: UnicodeString);
   begin
     inherited;
 
@@ -1922,7 +1942,7 @@ implementation
     else if SameText(aValue, 'false') then
       Value := FALSE
     else
-      raise EJSONError.CreateFmt('"%s" is not a valid value for a boolean', [aValue]);
+      raise EJsonError.CreateFmt('"%s" is not a valid value for a boolean', [aValue]);
   end;
 
 
@@ -1932,19 +1952,19 @@ implementation
 
 
 
-{ TJSONDouble ------------------------------------------------------------------------------------ }
+{ TJsonDouble ------------------------------------------------------------------------------------ }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONDouble.CopyFrom(const aSource: TJSONValue);
+  procedure TJsonDouble.CopyFrom(const aSource: TJsonValue);
   begin
     inherited CopyFrom(aSource);
 
-    fValue := TJSONDouble(aSource).fValue;
+    fValue := TJsonDouble(aSource).fValue;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONDouble.DoGetAsString: UnicodeString;
+  function TJsonDouble.DoGetAsString: UnicodeString;
   begin
     result := FloatToStr(fValue);
 
@@ -1954,7 +1974,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONDouble.DoSetAsString(const aValue: UnicodeString);
+  procedure TJsonDouble.DoSetAsString(const aValue: UnicodeString);
   begin
     inherited;
 
@@ -1963,7 +1983,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONDouble.set_Value(const aValue: Double);
+  procedure TJsonDouble.set_Value(const aValue: Double);
   begin
     IsNull := FALSE;
     fValue := aValue;
@@ -1975,26 +1995,26 @@ implementation
 
 
 
-{ TJSONInteger ----------------------------------------------------------------------------------- }
+{ TJsonInteger ----------------------------------------------------------------------------------- }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONInteger.CopyFrom(const aSource: TJSONValue);
+  procedure TJsonInteger.CopyFrom(const aSource: TJsonValue);
   begin
     inherited CopyFrom(aSource);
 
-    fValue := TJSONInteger(aSource).fValue;
+    fValue := TJsonInteger(aSource).fValue;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONInteger.DoGetAsString: UnicodeString;
+  function TJsonInteger.DoGetAsString: UnicodeString;
   begin
     result := IntToStr(fValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONInteger.DoSetAsString(const aValue: UnicodeString);
+  procedure TJsonInteger.DoSetAsString(const aValue: UnicodeString);
   begin
     inherited;
 
@@ -2003,7 +2023,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONInteger.set_Value(const aValue: Int64);
+  procedure TJsonInteger.set_Value(const aValue: Int64);
   begin
     IsNull := FALSE;
     fValue := aValue;
@@ -2015,10 +2035,10 @@ implementation
 
 
 
-{ TJSONString ------------------------------------------------------------------------------------ }
+{ TJsonString ------------------------------------------------------------------------------------ }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONString.Decode(const aValue: UnicodeString): UnicodeString;
+  class function TJsonString.Decode(const aValue: UnicodeString): UnicodeString;
 
     function UnescapeUnicode(var aI: Integer): WideChar;
     var
@@ -2051,7 +2071,7 @@ implementation
     if quoted then
     begin
       if (len < 2) or (aValue[len] <> '"') then
-        raise EJSONError.Create('Quoted string not terminated');
+        raise EJsonError.Create('Quoted string not terminated');
 
       Inc(i);
       Dec(len);
@@ -2067,7 +2087,7 @@ implementation
         if (c = '\') then
         begin
           if (i = len) then
-            raise EJSONError.Create('Incomplete escape sequence');
+            raise EJsonError.Create('Incomplete escape sequence');
 
           Inc(i);
           c := aValue[i];
@@ -2082,9 +2102,9 @@ implementation
             'u' : if (i + 4) <= len then
                     c := UnescapeUnicode(i)
                   else
-                    raise EJSONError.Create('Incomplete Unicode escape sequence');
+                    raise EJsonError.Create('Incomplete Unicode escape sequence');
           else
-            raise EJSONError.Create('Invalid escape sequence');
+            raise EJsonError.Create('Invalid escape sequence');
           end;
         end;
 
@@ -2100,7 +2120,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONString.Encode(const aValue: UnicodeString): UnicodeString;
+  class function TJsonString.Encode(const aValue: UnicodeString): UnicodeString;
 
     procedure EscapeUnicode(const aChar: WideChar);
     var
@@ -2154,14 +2174,14 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONString.get_AsJSON: UnicodeString;
+  function TJsonString.get_AsJson: UnicodeString;
   begin
-    result := TJSONString.Encode(fValue);
+    result := TJsonString.Encode(fValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONString.set_Value(const aValue: UnicodeString);
+  procedure TJsonString.set_Value(const aValue: UnicodeString);
   begin
     IsNull := FALSE;
     fValue := aValue;
@@ -2169,23 +2189,23 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONString.CopyFrom(const aSource: TJSONValue);
+  procedure TJsonString.CopyFrom(const aSource: TJsonValue);
   begin
     inherited CopyFrom(aSource);
 
-    fValue := TJSONString(aSource).fValue;
+    fValue := TJsonString(aSource).fValue;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONString.DoGetAsString: UnicodeString;
+  function TJsonString.DoGetAsString: UnicodeString;
   begin
     result := fValue;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONString.DoSetAsString(const aValue: UnicodeString);
+  procedure TJsonString.DoSetAsString(const aValue: UnicodeString);
   begin
     inherited;
 
@@ -2198,12 +2218,12 @@ implementation
 
 
 
-{ TJSONObject ------------------------------------------------------------------------------------ }
+{ TJsonObject ------------------------------------------------------------------------------------ }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function TJSONObject.TryCreate(const aString: UnicodeString): TJSONObject;
+  class function TJsonObject.TryCreate(const aString: UnicodeString): TJsonObject;
   begin
-    result := TJSONObject.Create;
+    result := TJsonObject.Create;
     try
       result.AsString := aString;
 
@@ -2215,7 +2235,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  constructor TJSONObject.Create;
+  constructor TJsonObject.Create;
   begin
     inherited Create;
 
@@ -2224,7 +2244,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  constructor TJSONObject.Create(const aString: UnicodeString);
+  constructor TJsonObject.Create(const aString: UnicodeString);
   begin
     Create;
     AsString := aString;
@@ -2232,7 +2252,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  constructor TJSONObject.CreateFromFile(const aFilename: UnicodeString;
+  constructor TJsonObject.CreateFromFile(const aFilename: UnicodeString;
                                          const aEncoding: TEncoding);
   begin
     Create;
@@ -2242,9 +2262,9 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONObject.Delete(const aValueName: UnicodeString);
+  procedure TJsonObject.Delete(const aValueName: UnicodeString);
   var
-    val: TJSONValue;
+    val: TJsonValue;
   begin
     if NOT Contains(aValueName) then
       EXIT;
@@ -2255,7 +2275,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  destructor TJSONObject.Destroy;
+  destructor TJsonObject.Destroy;
   begin
     FreeAndNIL(fValues);
     inherited;
@@ -2263,59 +2283,59 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.get_IsEmpty: Boolean;
+  function TJsonObject.get_IsEmpty: Boolean;
   begin
     result := (fValues.Count = 0);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.get_Value(const aName: UnicodeString): TJSONValue;
+  function TJsonObject.get_Value(const aName: UnicodeString): TJsonValue;
   begin
     result := FindValue(aName);
 
     if NOT Assigned(result) then
-      raise EJSONError.CreateFmt('No such value (%s) in object', [aName]);
+      raise EJsonError.CreateFmt('No such value (%s) in object', [aName]);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.get_ValueByIndex(const aIndex: Integer): TJSONValue;
+  function TJsonObject.get_ValueByIndex(const aIndex: Integer): TJsonValue;
   begin
-    result := TJSONValue(fValues[aIndex]);
+    result := TJsonValue(fValues[aIndex]);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.get_ValueCount: Integer;
+  function TJsonObject.get_ValueCount: Integer;
   begin
     result := fValues.Count;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONObject.Add(const aValue: TJSONValue);
+  procedure TJsonObject.Add(const aValue: TJsonValue);
   begin
     fValues.Add(aValue);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.AddAfter(const aPredecessor: UnicodeString;
+  function TJsonObject.AddAfter(const aPredecessor: UnicodeString;
                                 const aName: UnicodeString;
-                                const aValue: UnicodeString): TJSONString;
+                                const aValue: UnicodeString): TJsonString;
   var
     i: Integer;
   begin
     if NOT Contains(aPredecessor) then
-      raise EJSONError.CreateFmt('No such predecessor ''%s''', [aPredecessor]);
+      raise EJsonError.CreateFmt('No such predecessor ''%s''', [aPredecessor]);
 
-    result := TJSONString.Create;
+    result := TJsonString.Create;
     result.Name  := aName;
     result.Value := aValue;
 
     for i := 0 to Pred(fValues.Count) do
-      if STR.SameText(aPredecessor, TJSONValue(fValues[i]).Name) then
+      if STR.SameText(aPredecessor, TJsonValue(fValues[i]).Name) then
         if i < Pred(fValues.Count) then
         begin
           fValues.Insert(i + 1, result);
@@ -2327,21 +2347,21 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONObject.Clear;
+  procedure TJsonObject.Clear;
   begin
     fValues.Clear;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.Clone: TJSONObject;
+  function TJsonObject.Clone: TJsonObject;
   begin
-    result := TJSONObject(inherited Clone);
+    result := TJsonObject(inherited Clone);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONObject.Combine(const aObject: TJSONObject);
+  procedure TJsonObject.Combine(const aObject: TJsonObject);
   var
     i: Integer;
   begin
@@ -2351,14 +2371,14 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.Contains(const aValueName: UnicodeString): Boolean;
+  function TJsonObject.Contains(const aValueName: UnicodeString): Boolean;
   begin
     result := Assigned(FindValue(aValueName));
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.Contains(const aValueName: UnicodeString;
+  function TJsonObject.Contains(const aValueName: UnicodeString;
                                 var   aValue: UnicodeString): Boolean;
   begin
     result := Assigned(FindValue(aValueName));
@@ -2368,8 +2388,8 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.Contains(const aValueName: UnicodeString;
-                                var   aValue: TJSONArray): Boolean;
+  function TJsonObject.Contains(const aValueName: UnicodeString;
+                                var   aValue: TJsonArray): Boolean;
   begin
     result := Contains(aValueName) and (Values[aValueName].ValueType = jsArray);
 
@@ -2379,11 +2399,11 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.Contains(const aValueName: UnicodeString;
+  function TJsonObject.Contains(const aValueName: UnicodeString;
                                 var   aValue: TWIDEStringArray): Boolean;
   var
     i: Integer;
-    values: TJSONArray;
+    values: TJsonArray;
   begin
     result := Contains(aValueName, values);
 
@@ -2397,10 +2417,10 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONObject.CopyFrom(const aSource: TJSONValue);
+  procedure TJsonObject.CopyFrom(const aSource: TJsonValue);
   var
     i: Integer;
-    source: TJSONObject absolute aSource;
+    source: TJsonObject absolute aSource;
   begin
     Clear;
 
@@ -2412,10 +2432,10 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.DoGetAsString: UnicodeString;
+  function TJsonObject.DoGetAsString: UnicodeString;
   var
     i: Integer;
-    value: TJSONValue;
+    value: TJsonValue;
   begin
     result := '';
 
@@ -2427,12 +2447,12 @@ implementation
       begin
         value := ValueByIndex[i];
 
-        result := result + TJSONString.Encode(value.Name) + ':';
+        result := result + TJsonString.Encode(value.Name) + ':';
 
         if value.IsNull then
           result := result + 'null'
         else if (value.ValueType = jsString) then
-          result := result + TJSONString.Encode(value.AsString)
+          result := result + TJsonString.Encode(value.AsString)
         else
           result := result + value.AsString;
 
@@ -2447,7 +2467,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONObject.DoSetAsString(const aValue: UnicodeString);
+  procedure TJsonObject.DoSetAsString(const aValue: UnicodeString);
   var
     source: IUnicodeReader;
   begin
@@ -2459,7 +2479,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONObject.Wipe;
+  procedure TJsonObject.Wipe;
   var
     i: Integer;
   begin
@@ -2469,7 +2489,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.FindValue(const aName: UnicodeString): TJSONValue;
+  function TJsonObject.FindValue(const aName: UnicodeString): TJsonValue;
   var
     i: Integer;
   begin
@@ -2485,22 +2505,22 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJSONObject.LoadFromStream(const aStream: TStream;
+  procedure TJsonObject.LoadFromStream(const aStream: TStream;
                                        const aEncoding: TEncoding);
   var
     source: IUnicodeReader;
-    reader: TJSONReader;
-    loaded: TJSONValue;
+    reader: TJsonReader;
+    loaded: TJsonValue;
   begin
     source := TUnicodeReader.Create(aStream, aEncoding);
 
     loaded := NIL;
-    reader := TJSONReader.Create(source);
+    reader := TJsonReader.Create(source);
     try
       loaded := reader.ReadValue;
 
-      if NOT (loaded is TJSONObject) then
-        raise EJSONError.Create('Stream does not contain a JSON object');
+      if NOT (loaded is TJsonObject) then
+        raise EJsonError.Create('Stream does not contain a Json object');
 
       Clear;
       CopyFrom(loaded);
@@ -2513,7 +2533,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.OptBoolean(const aName: UnicodeString;
+  function TJsonObject.OptBoolean(const aName: UnicodeString;
                                   const aDefault: Boolean): Boolean;
   begin
     if Contains(aName) and NOT Values[aName].IsNull then
@@ -2524,7 +2544,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.OptDateTime(const aName: UnicodeString;
+  function TJsonObject.OptDateTime(const aName: UnicodeString;
                                    const aDefault: TDateTime): TDateTime;
   begin
     if Contains(aName) and NOT Values[aName].IsNull then
@@ -2535,7 +2555,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.OptEnum(const aName: UnicodeString;
+  function TJsonObject.OptEnum(const aName: UnicodeString;
                                const aTypeInfo: PTypeInfo;
                                const aDefault: Integer): Integer;
   begin
@@ -2547,7 +2567,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.OptInteger(const aName: UnicodeString;
+  function TJsonObject.OptInteger(const aName: UnicodeString;
                                   const aDefault: Integer): Integer;
   begin
     if Contains(aName) and NOT Values[aName].IsNull then
@@ -2558,7 +2578,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.OptString(const aName: UnicodeString;
+  function TJsonObject.OptString(const aName: UnicodeString;
                                  const aDefault: UnicodeString): UnicodeString;
   begin
     if Contains(aName) and NOT Values[aName].IsNull then
@@ -2570,7 +2590,7 @@ implementation
 
 {$ifdef DELPHI2009__}
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.OptDate(const aName: UnicodeString; const aDefault: TDate): TDate;
+  function TJsonObject.OptDate(const aName: UnicodeString; const aDefault: TDate): TDate;
   begin
     if Contains(aName) and NOT Values[aName].IsNull then
       result := Values[aName].AsDate
@@ -2580,7 +2600,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONObject.OptTime(const aName: UnicodeString;
+  function TJsonObject.OptTime(const aName: UnicodeString;
                                const aDefault: TTime): TTime;
   begin
     if Contains(aName) and NOT Values[aName].IsNull then
@@ -2596,10 +2616,10 @@ implementation
 
 
 
-{ TJSONReader ------------------------------------------------------------------------------ }
+{ TJsonReader ------------------------------------------------------------------------------ }
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  constructor TJSONReader.Create(const aSource: IUnicodeReader);
+  constructor TJsonReader.Create(const aSource: IUnicodeReader);
   begin
     inherited Create;
 
@@ -2608,27 +2628,27 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONReader.EOF: Boolean;
+  function TJsonReader.EOF: Boolean;
   begin
     result := fSource.EOF;
   end;
 
 
-  function TJSONReader.NextChar: WideChar;
+  function TJsonReader.NextChar: WideChar;
   begin
     result := fSource.PeekChar;
    end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONReader.NextRealChar: WideChar;
+  function TJsonReader.NextRealChar: WideChar;
   begin
     result := fSource.PeekCharSkippingWhitespace;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONReader.ReadChar: WideChar;
+  function TJsonReader.ReadChar: WideChar;
   begin
     result := fSource.NextChar;
   end;
@@ -2636,21 +2656,21 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONReader.ReadRealChar: WideChar;
+  function TJsonReader.ReadRealChar: WideChar;
   begin
     result := fSource.NextCharSkippingWhitespace;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONReader.ReadArray: TJSONArray;
+  function TJsonReader.ReadArray: TJsonArray;
   var
-    value: TJSONValue;
+    value: TJsonValue;
   begin
     if ReadRealChar <> '[' then
-      raise EJSONStreamError.Create('Expected ''[''');
+      raise EJsonStreamError.Create('Expected ''[''');
 
-    result := TJSONArray.Create;
+    result := TJsonArray.Create;
     try
       if (NextRealChar = ']') then
       begin
@@ -2676,11 +2696,11 @@ implementation
 
           ',' : ReadRealChar;
         else
-          raise EJSONStreamError.Create('Unexpected character ''' + NextRealChar + ''' in array');
+          raise EJsonStreamError.Create('Unexpected character ''' + NextRealChar + ''' in array');
         end;
       end;
 
-      raise EJSONStreamError.Create('Array not closed');
+      raise EJsonStreamError.Create('Array not closed');
 
     except
       result.Free;
@@ -2690,16 +2710,16 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONReader.ReadObject: TJSONObject;
+  function TJsonReader.ReadObject: TJsonObject;
   var
     c: WideChar;
     name: UnicodeString;
-    value: TJSONValue;
+    value: TJsonValue;
   begin
     if ReadRealChar <> '{' then
-      raise EJSONStreamError.Create('Expected ''{''');
+      raise EJsonStreamError.Create('Expected ''{''');
 
-    result := TJSONObject.Create;
+    result := TJsonObject.Create;
     try
       if (NextRealChar = '}') then
       begin
@@ -2716,12 +2736,12 @@ implementation
 
         c := ReadRealChar;
         if (c <> ':') then
-          raise EJSONStreamError.Create('Expected '':'', read ''' + c + ''' instead');
+          raise EJsonStreamError.Create('Expected '':'', read ''' + c + ''' instead');
 
         value := ReadValue;
 
         if NOT Assigned(value) then
-          raise EJSONStreamError.Create('Expected value');
+          raise EJsonStreamError.Create('Expected value');
 
         value.Name := name;
 
@@ -2739,11 +2759,11 @@ implementation
           ',' : ReadRealChar;
 
         else
-          raise EJSONStreamError.Create('Unexpected character ''' + NextRealChar + ''' in object');
+          raise EJsonStreamError.Create('Unexpected character ''' + NextRealChar + ''' in object');
         end;
       end;
 
-      raise EJSONStreamError.Create('Object not terminated');
+      raise EJsonStreamError.Create('Object not terminated');
 
     except
       result.Free;
@@ -2753,9 +2773,9 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONReader.ReadName: UnicodeString;
+  function TJsonReader.ReadName: UnicodeString;
   {
-    NOTE: This supports a relaxed JSON reader that allows for unquoted object
+    NOTE: This supports a relaxed Json reader that allows for unquoted object
            value names instead of requiring quoted string values.  The lack
            of quotes means that allowed names are much simplified: only alpha
            characters are permitted.  Whitespace, most symbols and escaped
@@ -2773,22 +2793,22 @@ implementation
         'a'..'z',
         'A'..'Z'  : result := result + c;
         '.', '-'  : if result = '' then
-                      raise EJSONStreamError.Create('Invalid name')
+                      raise EJsonStreamError.Create('Invalid name')
                     else
                       result := result + c;
       else
-        raise EJSONStreamError.Create('Invalid name');
+        raise EJsonStreamError.Create('Invalid name');
       end;
 
       if EOF then
-        raise EJSONError.Create('UnicodeString not terminated');
+        raise EJsonError.Create('UnicodeString not terminated');
 
       c := NextRealChar;
 
       if ANSIChar(c) = ':' then
       begin
         if WIDE.EndsWith(result, '.') or WIDE.EndsWith(result, '-') then
-          raise EJSONStreamError.Create('Invalid name')
+          raise EJsonStreamError.Create('Invalid name')
         else
           EXIT;
       end;
@@ -2798,9 +2818,9 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONReader.ReadString(const aQuoted: Boolean): UnicodeString;
+  function TJsonReader.ReadString(const aQuoted: Boolean): UnicodeString;
   {
-    NOTE: This effectively duplicates the functionality of TJSONString.Decode
+    NOTE: This effectively duplicates the functionality of TJsonString.Decode
            but it is far more efficient to decode inline than it would be to
            parse the reading of the entire string before decoding it.
   }
@@ -2820,7 +2840,7 @@ implementation
         if c in ['0'..'9', 'a'..'f', 'A'..'F'] then
           buf[BYTEINDEX[i]] := c
         else
-          raise EJSONStreamError.CreateFmt('Invalid character ''%s'' in escaped Unicode', [c]);
+          raise EJsonStreamError.CreateFmt('Invalid character ''%s'' in escaped Unicode', [c]);
 
         ReadChar;
       end;
@@ -2834,11 +2854,11 @@ implementation
     if aQuoted then
     begin
       if (ReadRealChar <> '"') then
-        raise EJSONStreamError.Create('Expected ''"''');
+        raise EJsonStreamError.Create('Expected ''"''');
     end;
 
     if EOF then
-      raise EJSONError.Create('UnicodeString not terminated');
+      raise EJsonError.Create('UnicodeString not terminated');
 
     result := '';
     while TRUE do
@@ -2858,7 +2878,7 @@ implementation
           'r' : c := WideChar(#13);
           'u' : c := UnescapeUnicode;
         else
-          raise EJSONStreamError.Create('Invalid escape character sequence');
+          raise EJsonStreamError.Create('Invalid escape character sequence');
         end;
       end
       else if aQuoted and (c = '"') then
@@ -2867,7 +2887,7 @@ implementation
       result := result + c;
 
       if EOF then
-        raise EJSONError.Create('UnicodeString not terminated');
+        raise EJsonError.Create('UnicodeString not terminated');
 
       c := NextChar;
 
@@ -2878,7 +2898,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJSONReader.ReadValue: TJSONValue;
+  function TJsonReader.ReadValue: TJsonValue;
   var
     c: WideChar;
     s: UnicodeString;
@@ -2894,7 +2914,7 @@ implementation
 
         '"'       : begin
                       s := ReadString;
-                      result := TJSONString.Create;
+                      result := TJsonString.Create;
                       result.AsString := s;
                     end;
 
@@ -2909,19 +2929,19 @@ implementation
                                       if Length(s) > 1 then
                                       begin
                                         if STR.IsInteger(s) then
-                                          result := TJSONInteger.Create
+                                          result := TJsonInteger.Create
                                         else if STR.IsNumeric(s) then
-                                          result := TJSONDouble.Create
+                                          result := TJsonDouble.Create
                                         else
-                                          raise EJSONStreamError.CreateFmt('''%s'' is not a valid number', [s]);
+                                          raise EJsonStreamError.CreateFmt('''%s'' is not a valid number', [s]);
                                       end
                                       else
-                                        result := TJSONInteger.Create;
+                                        result := TJsonInteger.Create;
 
                                       result.AsString := '-' + s;
                                     end;
                       else
-                        raise EJSONStreamError.CreateFmt('Expected 1..9, found ''%s''', [c]);
+                        raise EJsonStreamError.CreateFmt('Expected 1..9, found ''%s''', [c]);
                       end;
                     end;
 
@@ -2931,14 +2951,14 @@ implementation
                       if Length(s) > 1 then
                       begin
                         if STR.IsInteger(s) then
-                          result := TJSONInteger.Create
+                          result := TJsonInteger.Create
                         else if STR.IsNumeric(s) then
-                          result := TJSONDouble.Create
+                          result := TJsonDouble.Create
                         else
-                          raise EJSONStreamError.CreateFmt('''%s'' is not a valid number', [s]);
+                          raise EJsonStreamError.CreateFmt('''%s'' is not a valid number', [s]);
                       end
                       else
-                        result := TJSONInteger.Create;
+                        result := TJsonInteger.Create;
 
                       result.AsString := s;
                     end;
@@ -2946,9 +2966,9 @@ implementation
         'n', 'N'  : begin
                       s := ReadString(FALSE);
                       if SameText(s, 'null') then
-                        result := TJSONNull.Create
+                        result := TJsonNull.Create
                       else
-                        raise EJSONStreamError.CreateFmt('Expected ''null'', found ''%s''', [s]);
+                        raise EJsonStreamError.CreateFmt('Expected ''null'', found ''%s''', [s]);
                     end;
 
         'f', 'F',
@@ -2956,19 +2976,19 @@ implementation
                       s := ReadString(FALSE);
                       if SameText(s, 'true') or SameText(s, 'false') then
                       begin
-                        result := TJSONBoolean.Create;
+                        result := TJsonBoolean.Create;
                         result.AsString := s;
                       end
                       else
-                        raise EJSONStreamError.CreateFmt('Expected ''true'' or ''false'', found ''%s''', [s]);
+                        raise EJsonStreamError.CreateFmt('Expected ''true'' or ''false'', found ''%s''', [s]);
                     end;
       else
-        raise EJSONStreamError.CreateFmt('Unexpected char (%s) in stream', [c]);
+        raise EJsonStreamError.CreateFmt('Unexpected char (%s) in stream', [c]);
       end;
 
     except
       result.Free;
-      raise EJSONStreamError.CreateFmt('Error at position %d, line %d', [fSource.Location.Character, fSource.Location.Line]);
+      raise EJsonStreamError.CreateFmt('Error at position %d, line %d', [fSource.Location.Character, fSource.Location.Line]);
     end;
   end;
 
@@ -2987,14 +3007,14 @@ implementation
 
   class function JsonFormatter.Format(const aJson: TJsonStructure; const aFormat: TJsonFormat): String;
 
-    function ObjectToString(const aObject: TJSONObject;
+    function ObjectToString(const aObject: TJsonObject;
                             const aIndent: Integer): UnicodeString; forward;
 
-    function ArrayToString(const aArray: TJSONArray;
+    function ArrayToString(const aArray: TJsonArray;
                            const aIndent: Integer): UnicodeString;
     var
       i: Integer;
-      item: TJSONValue;
+      item: TJsonValue;
     begin
       if (aArray.Count = 0) then
       begin
@@ -3017,18 +3037,18 @@ implementation
 
           if NOT item.IsNull then
             case item.ValueType of
-              jsString  : result := result + TJSONString.Encode(item.AsString);
+              jsString  : result := result + TJsonString.Encode(item.AsString);
 
               jsArray   : begin
                             if aFormat in [jfStandard, jfConfig] then
                               result := result + '  ';
-                            result := result + ArrayToString(item as TJSONArray, aIndent + 2);
+                            result := result + ArrayToString(item as TJsonArray, aIndent + 2);
                           end;
 
               jsObject  : begin
                             if aFormat in [jfStandard, jfConfig] then
                               result := result + '  ';
-                            result := result + ObjectToString(item as TJSONObject, aIndent + 2);
+                            result := result + ObjectToString(item as TJsonObject, aIndent + 2);
                           end;
             else
               result := result + item.AsString;
@@ -3058,11 +3078,11 @@ implementation
       result := result + ']';
     end;
 
-    function ObjectToString(const aObject: TJSONObject;
+    function ObjectToString(const aObject: TJsonObject;
                             const aIndent: Integer): UnicodeString;
     var
       i: Integer;
-      value: TJSONValue;
+      value: TJsonValue;
     begin
       if (aObject.ValueCount = 0) then
       begin
@@ -3086,7 +3106,7 @@ implementation
           if (aFormat = jfConfig) then
             result := result + value.Name
           else
-            result := result + TJSONString.Encode(value.Name);
+            result := result + TJsonString.Encode(value.Name);
 
           result := result + ':';
           if (aFormat = jfConfig) then
@@ -3096,9 +3116,9 @@ implementation
             result := result + 'null'
           else
             case value.ValueType of
-              jsString  : result := result + TJSONString.Encode(value.AsString);
-              jsArray   : result := result + ArrayToString(value as TJSONArray, aIndent + 4);
-              jsObject  : result := result + ObjectToString(value as TJSONObject, aIndent + 4);
+              jsString  : result := result + TJsonString.Encode(value.AsString);
+              jsArray   : result := result + ArrayToString(value as TJsonArray, aIndent + 4);
+              jsObject  : result := result + ObjectToString(value as TJsonObject, aIndent + 4);
             else
               result := result + value.AsString;
             end;
@@ -3122,10 +3142,10 @@ implementation
 
   begin
     case aJson.ValueType of
-      jsArray   : result := ArrayToString(TJSONArray(aJson), 0);
-      jsObject  : result := ObjectToString(TJSONObject(aJson), 0);
+      jsArray   : result := ArrayToString(TJsonArray(aJson), 0);
+      jsObject  : result := ObjectToString(TJsonObject(aJson), 0);
     else
-      result := 'Not a JSON array or object';
+      result := 'Not a Json array or object';
     end;
   end;
 

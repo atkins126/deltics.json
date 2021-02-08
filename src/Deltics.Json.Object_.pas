@@ -17,18 +17,16 @@ interface
     TJsonObject = class(TJsonCollection, IJsonObject)
     // IJsonObject
     protected
-      function get_Value(const aName: UnicodeString): IJsonValue;
       function get_Item(const aIndex: Integer): IJsonMember;
+      function get_Value(const aName: UnicodeString): IJsonValue; overload;
     public
       function Add(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
       function Contains(const aName: UnicodeString): Boolean; overload;
       function Contains(const aName: UnicodeString; var aMember: IJsonMember): Boolean; overload;
-      property Value[const aName: UnicodeString]: IJsonValue read get_Value; default;
-      property Items[const aIndex: Integer]: IJsonMember read get_Item;
+//      property Value[const aName: UnicodeString]: IJsonValue read get_Value; default;
+//      property Items[const aIndex: Integer]: IJsonMember read get_Item;
 
     protected
-      function DoGetAsString: UnicodeString; override;
-      procedure DoSetAsString(const aValue: UnicodeString); override;
       function InternalAdd(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
     end;
 
@@ -73,7 +71,7 @@ implementation
 
     for i := 0 to Pred(Count) do
     begin
-      aMember := Items[i];
+      aMember := Items[i] as IJsonMember;
       if aMember.Name = aName then
         EXIT;
     end;
@@ -86,20 +84,6 @@ implementation
   function TJsonObject.get_Value(const aName: UnicodeString): IJsonValue;
   begin
     result := TJsonMemberValue.Create(self as IJsonObject, aName)
-  end;
-
-
-  function TJsonObject.DoGetAsString: UnicodeString;
-  begin
-    // TODO
-  end;
-
-
-  procedure TJsonObject.DoSetAsString(const aValue: UnicodeString);
-  begin
-    inherited;
-
-    // TODO
   end;
 
 

@@ -100,19 +100,19 @@ interface
 
 
 
-  function JsonBoolean: Deltics.Json.Factories.JsonBoolean; overload; {$ifdef InlineMethods} inline; {$endif}
-  function JsonBoolean(const aValue: Boolean): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonBoolean: Deltics.Json.Factories.JsonBoolean; overload;
+  function JsonBoolean(const aValue: Boolean): IJsonValue; overload;
 
-  function JsonNumber: Deltics.Json.Factories.JsonNumber; overload; {$ifdef InlineMethods} inline; {$endif}
-  function JsonNumber(const aValue: Cardinal): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-  function JsonNumber(const aValue: Double): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-  function JsonNumber(const aValue: Extended): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-  function JsonNumber(const aValue: Integer): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-  function JsonNumber(const aValue: Int64): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonNumber: Deltics.Json.Factories.JsonNumber; overload;
+  function JsonNumber(const aValue: Cardinal): IJsonValue; overload;
+  function JsonNumber(const aValue: Double): IJsonValue; overload;
+  function JsonNumber(const aValue: Extended): IJsonValue; overload;
+  function JsonNumber(const aValue: Integer): IJsonValue; overload;
+  function JsonNumber(const aValue: Int64): IJsonValue; overload;
 
-  function JsonString: Deltics.Json.Factories.JsonString; overload; {$ifdef InlineMethods} inline; {$endif}
-  function JsonString(const aValue: UnicodeString): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-  function JsonString(const aValue: Utf8String): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonString: Deltics.Json.Factories.JsonString; overload;
+  function JsonString(const aValue: UnicodeString): IJsonValue; overload;
+  function JsonString(const aValue: Utf8String): IJsonValue; overload;
 
 
 implementation

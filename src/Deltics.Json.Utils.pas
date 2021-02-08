@@ -8,6 +8,9 @@ interface
 
   uses
     Classes,
+    SysUtils,
+    Deltics.Datetime,
+    Deltics.Strings,
     Deltics.Json.Interfaces;
 
   type
@@ -38,10 +41,8 @@ interface
 implementation
 
   uses
-    SysUtils,
+    Deltics.io.Text,
     Deltics.Pointers,
-    Deltics.Strings,
-    Deltics.IO.Text,
     Deltics.Json.Exceptions,
     Deltics.Json.Reader;
 
@@ -239,7 +240,7 @@ implementation
       buf[0] := Utf8Char(aValue[aI + 3]);
       buf[1] := Utf8Char(aValue[aI + 4]);
 
-      HexToBin(PANSIChar(@buf), @result, 4);
+      HexToBin(PANSIChar(@buf), result, 4);
 
       Inc(aI, 4);
     end;
@@ -322,7 +323,7 @@ implementation
       i: Integer;
       buf: array[0..3] of Char;
     begin
-      Classes.BinToHex(@aChar, PWideChar(@buf), 2);
+//      Classes.BinToHex(@aChar, PWideChar(@buf), 2);
 
       i := Length(result);
       SetLength(result, i + 6);

@@ -8,6 +8,7 @@ interface
 
   uses
     TypInfo,
+    Deltics.Datetime,
     Deltics.Strings;
 
 
@@ -36,7 +37,9 @@ interface
       function get_AsGuid: TGuid;
       function get_AsInt64: Int64;
       function get_AsInteger: Integer;
+      function get_AsSingle: Single;
       function get_AsString: UnicodeString;
+      function get_AsUtf8: Utf8String;
       function get_IsNull: Boolean;
       function get_Value: Utf8String;
       function get_ValueType: TValueType;
@@ -50,8 +53,9 @@ interface
       procedure set_AsGuid(const aValue: TGuid);
       procedure set_AsInt64(const aValue: Int64);
       procedure set_AsInteger(const aValue: Integer);
+      procedure set_AsSingle(const aValue: Single);
       procedure set_AsString(const aValue: UnicodeString);
-      procedure set_Value(const aValue: Utf8String);
+      procedure set_AsUtf8(const aValue: Utf8String);
 
       property AsBoolean: Boolean read get_AsBoolean write set_AsBoolean;
       property AsCardinal: Cardinal read get_AsCardinal write set_AsCardinal;
@@ -64,9 +68,11 @@ interface
       property AsGuid: TGuid read get_AsGuid write set_AsGuid;
       property AsInt64: Int64 read get_AsInt64 write set_AsInt64;
       property AsInteger: Integer read get_AsInteger write set_AsInteger;
+      property AsSingle: Single read get_AsSingle write set_AsSingle;
       property AsString: UnicodeString read get_AsString write set_AsString;
+      property AsUtf8: Utf8String read get_AsUtf8 write set_AsUtf8;
       property IsNull: Boolean read get_IsNull;
-      property Value: Utf8String read get_Value write set_Value;
+      property Value: Utf8String read get_Value;
       property ValueType: TValueType read get_ValueType;
     end;
 

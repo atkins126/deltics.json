@@ -8,7 +8,9 @@ interface
 
   uses
     TypInfo,
+    Deltics.Datetime,
     Deltics.InterfacedObjects,
+    Deltics.Strings,
     Deltics.Json.Interfaces,
     Deltics.Json.Value;
 
@@ -30,7 +32,9 @@ interface
       function get_AsGuid: TGuid;
       function get_AsInt64: Int64;
       function get_AsInteger: Integer;
+      function get_AsSingle: Single;
       function get_AsString: UnicodeString;
+      function get_AsUtf8: UTF8String;
       function get_IsNull: Boolean;
       function get_Value: Utf8String;
       function get_ValueType: TValueType;
@@ -44,8 +48,9 @@ interface
       procedure set_AsGuid(const aValue: TGuid);
       procedure set_AsInt64(const aValue: Int64);
       procedure set_AsInteger(const aValue: Integer);
+      procedure set_AsSingle(const aValue: Single);
       procedure set_AsString(const aValue: UnicodeString);
-      procedure set_Value(const aValue: Utf8String);
+      procedure set_AsUtf8(const aValue: Utf8String);
 
     private
       fObject: IJsonObject;
@@ -153,6 +158,12 @@ implementation
   end;
 
 
+  function TJsonMemberValue.get_AsSingle: Single;
+  begin
+    result := fValue.AsSingle;
+  end;
+
+
   function TJsonMemberValue.get_AsString: UnicodeString;
   begin
     result := fValue.AsString;
@@ -162,6 +173,12 @@ implementation
   function TJsonMemberValue.get_AsTime: TTime;
   begin
     result := fValue.AsTime;
+  end;
+
+
+  function TJsonMemberValue.get_AsUtf8: Utf8String;
+  begin
+    result := fValue.AsUtf8;
   end;
 
 
@@ -252,6 +269,12 @@ implementation
   end;
 
 
+  procedure TJsonMemberValue.set_AsSingle(const aValue: Single);
+  begin
+    MemberValue.AsSingle := aValue;
+  end;
+
+
   procedure TJsonMemberValue.set_AsString(const aValue: UnicodeString);
   begin
     MemberValue.AsString := aValue;
@@ -264,10 +287,12 @@ implementation
   end;
 
 
-  procedure TJsonMemberValue.set_Value(const aValue: Utf8String);
+  procedure TJsonMemberValue.set_AsUtf8(const aValue: Utf8String);
   begin
-    MemberValue.Value := aValue;
+    MemberValue.AsUtf8 := aValue;
   end;
+
+
 
 
 

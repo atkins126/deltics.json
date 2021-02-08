@@ -8,6 +8,7 @@ interface
 
   uses
     TypInfo,
+    Deltics.Datetime,
     Deltics.InterfacedObjects,
     Deltics.Strings,
     Deltics.Json.Exceptions,
@@ -29,9 +30,11 @@ interface
       function get_AsGuid: TGuid;
       function get_AsInt64: Int64; virtual;
       function get_AsInteger: Integer; virtual;
+      function get_AsSingle: Single;
       function get_AsString: UnicodeString;
+      function get_AsUtf8: Utf8String;
       function get_IsNull: Boolean;
-      function get_Value: Utf8String;
+      function get_Value: Utf8String; overload;
       function get_ValueType: TValueType;
       procedure set_AsBoolean(const aValue: Boolean);
       procedure set_AsCardinal(const aValue: Cardinal); virtual;
@@ -43,8 +46,9 @@ interface
       procedure set_AsGuid(const aValue: TGuid);
       procedure set_AsInt64(const aValue: Int64); virtual;
       procedure set_AsInteger(const aValue: Integer); virtual;
+      procedure set_AsSingle(const aValue: Single);
       procedure set_AsString(const aValue: UnicodeString);
-      procedure set_Value(const aValue: Utf8String);
+      procedure set_AsUtf8(const aValue: Utf8String);
 
     private
       fAsString: UnicodeString;
@@ -55,25 +59,15 @@ interface
       constructor CreateArray;
       constructor CreateObject;
       procedure ErrorIfNull(ExceptionClass: EJsonClass = NIL);
-      function DoGetAsString: UnicodeString; virtual;
-      procedure DoSetAsString(const aValue: UnicodeString); virtual;
       procedure SetNull;
-      procedure SetValue(const aValueType: TValueType; const aValueAsString: UnicodeString);
+      procedure SetValue(const aValueType: TValueType; const aValue: UnicodeString); overload;
+      procedure SetValue(const aValueType: TValueType; const aValue: Utf8String); overload;
     public
       constructor Create;
-      property AsBoolean: Boolean read get_AsBoolean write set_AsBoolean;
-      property AsCardinal: Cardinal read get_AsCardinal write set_AsCardinal;
-      property AsDateTime: TDateTime read get_AsDateTime write set_AsDateTime;
-      property AsDouble: Double read get_AsDouble write set_AsDouble;
-      property AsEnum[const aTypeInfo: PTypeInfo]: Integer read get_AsEnum;
-      property AsExtended: Extended read get_AsExtended write set_AsExtended;
-      property AsGuid: TGuid read get_AsGuid write set_AsGuid;
-      property AsInt64: Int64 read get_AsInt64 write set_AsInt64;
-      property AsInteger: Integer read get_AsInteger write set_AsInteger;
       property AsString: UnicodeString read fAsString write set_AsString;
-      property IsNull: Boolean read get_IsNull;
-      property Value: Utf8String read fValue write set_Value;
-      property ValueType: TValueType read get_ValueType;
+      property IsNull: Boolean read fIsNull;
+      property Value: Utf8String read get_Value;
+      property ValueType: TValueType read fValueType;
     end;
 
 
@@ -82,7 +76,9 @@ implementation
 
   uses
     SysUtils,
-    Deltics.DateTime,
+  {$ifNdef RecordsWithMethods}
+    Windows,
+  {$endif}
     Deltics.Guids,
     Deltics.Json.Utils;
 
@@ -122,26 +118,6 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJsonValue.DoGetAsString: UnicodeString;
-  begin
-    if IsNull then
-      result := 'null'
-    else
-      result := Wide.FromUtf8(fValue);
-  end;
-
-
-  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJsonValue.DoSetAsString(const aValue: UnicodeString);
-  begin
-    if (aValue = 'null') then
-      SetNull
-    else
-      Value := Utf8.FromString(aValue);
-  end;
-
-
-  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.ErrorIfNull(ExceptionClass: EJsonClass);
   begin
     if IsNull then
@@ -172,7 +148,7 @@ implementation
                   end;
 
     else
-      raise EJsonConvertError.Create('Value is not a Boolean or String');
+      raise EJsonConvertError.Create('Not a Boolean or String');
     end;
   end;
 
@@ -187,14 +163,14 @@ implementation
     case ValueType of
       jsNumber,
       jsString  : begin
-                    i := Cardinal(AsInt64);
-                    if (i < Low(Integer)) or (i > High(Integer)) then
+                    if  NOT TryStrToInt64(AsString, i)
+                     or ((i < Low(Integer)) or (i > High(Integer))) then
                       raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as a Cardinal', [AsString]);
 
-                    result := Integer(i);
+                    result := Cardinal(i);
                   end;
     else
-      raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as a Cardinal', [AsString]);
+      raise EJsonConvertError.Create('Not a Number or String');
     end;
   end;
 
@@ -251,30 +227,38 @@ implementation
     case ValueType of
       jsNumber,
       jsString  : begin
-                    e := AsExtended;
-                    if (e > MaxDouble) or (e < MinDouble) then
+                    if  NOT TryStrToFloat(AsString, e)
+                     or (e > MaxDouble) or (e < MinDouble) then
                       raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as Double', [AsString]);
 
                     result := e;
                   end;
     else
-      raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as Double', [AsString]);
+      raise EJsonConvertError.Create('Not a Number or String');
     end;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   function TJsonValue.get_AsEnum(const aTypeInfo: PTypeInfo): Integer;
+  var
+    enum: PTypeData;
   begin
     if IsNull then
       raise EJsonConvertError.Create('Null cannot be converted to Enum');
 
     case ValueType of
-//      jsBoolean : if TJsonBoolean(self).Value then result := 1 else result := 0;
-      jsNumber  : result := AsInteger;
+      jsNumber  : begin
+                    enum := GetTypeData(aTypeInfo);
+
+                    if  NOT TryStrToInt(AsString, result)
+                     or (result < enum.MinValue)
+                     or (result > enum.MaxValue) then
+                      raise EJsonConvertError.CreateFmt('''%s'' is not a valid ordinal value for the enum ''%s''', [AsString, aTypeInfo.Name]);
+                  end;
       jsString  : result := GetEnumValue(aTypeInfo, AsString);
     else
-      raise EJsonConvertError.Create('Cannot convert to Enum');
+      raise EJsonConvertError.Create('Not a Number or String');
     end;
   end;
 
@@ -286,14 +270,10 @@ implementation
 
     case ValueType of
       jsNumber,
-      jsString  : try
-                    // TODO: Thread safe implementation using TFormatSettings
-                    result := StrToFloat(AsString);
-                  except
+      jsString  : if  NOT TryStrToFloat(AsString, result) then
                     raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as Extended', [AsString]);
-                  end;
     else
-      raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as Extended', [AsString]);
+      raise EJsonConvertError.Create('Not a Number or String');
     end;
   end;
 
@@ -347,12 +327,33 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  function TJsonValue.get_AsSingle: Single;
+  begin
+    ErrorIfNull;
+
+    case ValueType of
+      jsNumber,
+      jsString  : if not TryStrToFloat(AsString, result) then
+                    raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as Single', [AsString]);
+    else
+      raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as an Single', [AsString]);
+    end;
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   function TJsonValue.get_AsString: UnicodeString;
   begin
-    if IsNull then
-      raise EJsonConvertError.Create('Cannot convert null to UnicodeString');
+    ErrorIfNull;
+    result := fAsString;
+  end;
 
-    result := DoGetAsString;
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  function TJsonValue.get_AsUtf8: Utf8String;
+  begin
+    ErrorIfNull;
+    result := fValue;
   end;
 
 
@@ -366,6 +367,7 @@ implementation
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   function TJsonValue.get_Value: Utf8String;
   begin
+    ErrorIfNull;
     result := fValue;
   end;
 
@@ -389,11 +391,22 @@ implementation
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.SetValue(const aValueType: TValueType;
-                                const aValueAsString: UnicodeString);
+                                const aValue: Utf8String);
   begin
-    fAsString   := aValueAsString;
+    fAsString   := Wide.FromUtf8(aValue);
     fValueType  := aValueType;
-    fValue      := Utf8.FromString(aValueAsString);
+    fValue      := aValue;
+    fIsNull     := FALSE;
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  procedure TJsonValue.SetValue(const aValueType: TValueType;
+                                const aValue: UnicodeString);
+  begin
+    fAsString   := aValue;
+    fValueType  := aValueType;
+    fValue      := Utf8.FromString(aValue);
     fIsNull     := FALSE;
   end;
 
@@ -422,7 +435,7 @@ implementation
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.set_AsCardinal(const aValue: Cardinal);
   begin
-
+    SetValue(jsNumber, IntToStr(Int64(aValue)));
   end;
 
 
@@ -435,15 +448,29 @@ implementation
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.set_AsDouble(const aValue: Double);
+  var
+    opt: TFormatSettings;
   begin
-    SetValue(jsNumber, FloatToStr(aValue));
+    {$ifdef RecordsWithMethods}
+      opt := TFormatSettings.Create;
+    {$else}
+      GetLocaleFormatSettings(GetThreadLocale, opt);
+    {$endif}
+    SetValue(jsNumber, FloatToStr(aValue, opt));
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.set_AsExtended(const aValue: Extended);
+  var
+    opt: TFormatSettings;
   begin
-    SetValue(jsNumber, FloatToStr(aValue));
+    {$ifdef RecordsWithMethods}
+      opt := TFormatSettings.Create;
+    {$else}
+      GetLocaleFormatSettings(GetThreadLocale, opt);
+    {$endif}
+    SetValue(jsNumber, FloatToStr(aValue, opt));
   end;
 
 
@@ -469,12 +496,24 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  procedure TJsonValue.set_AsSingle(const aValue: Single);
+  var
+    opt: TFormatSettings;
+  begin
+    {$ifdef RecordsWithMethods}
+      opt := TFormatSettings.Create;
+    {$else}
+      GetLocaleFormatSettings(GetThreadLocale, opt);
+    {$endif}
+    SetValue(jsNumber, FloatToStr(aValue, opt));
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.set_AsString(const aValue: UnicodeString);
   begin
     SetValue(jsString, aValue);
   end;
-
-
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
@@ -491,13 +530,15 @@ implementation
   end;
 
 
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  procedure TJsonValue.set_AsUtf8(const aValue: Utf8String);
+  begin
+    SetValue(jsString, aValue);
+  end;
 
 
 
 
-procedure TJsonValue.set_Value(const aValue: Utf8String);
-begin
-
-end;
 
 end.
+

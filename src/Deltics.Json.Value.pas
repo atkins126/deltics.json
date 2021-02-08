@@ -76,7 +76,7 @@ implementation
 
   uses
     SysUtils,
-  {$ifNdef RecordsWithMethods}
+  {$ifNdef DELPHIXE__}
     Windows,
   {$endif}
     Deltics.Guids,
@@ -451,7 +451,7 @@ implementation
   var
     opt: TFormatSettings;
   begin
-    {$ifdef RecordsWithMethods}
+    {$ifdef DELPHIXE__}
       opt := TFormatSettings.Create;
     {$else}
       GetLocaleFormatSettings(GetThreadLocale, opt);
@@ -465,7 +465,7 @@ implementation
   var
     opt: TFormatSettings;
   begin
-    {$ifdef RecordsWithMethods}
+    {$ifdef DELPHIXE__}
       opt := TFormatSettings.Create;
     {$else}
       GetLocaleFormatSettings(GetThreadLocale, opt);
@@ -500,7 +500,7 @@ implementation
   var
     opt: TFormatSettings;
   begin
-    {$ifdef RecordsWithMethods}
+    {$ifdef DELPHIXE__}
       opt := TFormatSettings.Create;
     {$else}
       GetLocaleFormatSettings(GetThreadLocale, opt);

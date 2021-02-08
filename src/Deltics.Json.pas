@@ -46,9 +46,6 @@ interface
 
   uses
   { deltics: }
-    Deltics.Datetime,
-    Deltics.IO.Text,
-    Deltics.Strings,
     Deltics.Json.Exceptions,
     Deltics.Json.Factories,
     Deltics.Json.Formatter,

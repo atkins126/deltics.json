@@ -37,7 +37,7 @@ implementation
   begin
     Test.Raises(EJsonConvertError);
 
-    sut := JsonNumber.Create(1.8e+308);
+    sut := JsonNumber(1.8e+308);
 
     sut.AsDouble;
   end;
@@ -47,29 +47,27 @@ implementation
   begin
     Test.Raises(EJsonConvertError);
 
-    sut := JsonNumber.Create(1.42);
+    sut := JsonNumber(1.42);
 
     sut.AsInteger;
   end;
 
 
   procedure NumberConversions.SetAsDoubleRaisesConvertErrorWhenDoubleRangeExceeded;
+  const
+    INFINITE: Double = 1.0 / 0.0;
   begin
     Test.Raises(EJsonConvertError);
 
-    sut := JsonNumber.Create(1.42);
+    sut := JsonNumber.AsDouble(1.8e+308);
 
-    sut.AsDouble := 1.8e+308;
-
-    Test('sut.AsDouble').Assert(sut.AsDouble).Equals(INFINITE);
+    Test('sut.AsDouble').AssertDouble(sut.AsDouble).Equals(INFINITE);
   end;
 
 
   procedure NumberConversions.SetFloatAsIntegerPreserves64BitsOfIntegerPrecision;
   begin
-    sut := JsonNumber.Create(1.42);
-
-    sut.AsInteger := High(Integer);
+    sut := JsonNumber.AsInteger(High(Integer));
 
     Test('sut.AsInteger').Assert(sut.AsInteger).Equals(High(Integer));
 
@@ -89,7 +87,7 @@ implementation
 
   procedure NumberConversions.SetIntegerAsDoubleRaisesConvertErrorWhenInt64RangeExceeded;
   begin
-    sut := JsonNumber.Create(0);
+    sut := JsonNumber.New;
 
     sut.AsDouble := 1.0 * ((Int64(1) shl 63) + 1);
   end;
@@ -97,7 +95,7 @@ implementation
 
   procedure NumberConversions.SetIntegerAsDoubleSucceedsWhenInInt64Range;
   begin
-    sut := JsonNumber.Create(0);
+    sut := JsonNumber.New;
 
     sut.AsDouble := 1.0 * ((Int64(1) shl 63));
   end;
@@ -105,7 +103,7 @@ implementation
 
   procedure NumberConversions.SetIntegerAsExtendedRaisesConvertErrorWhenInt64RangeExceeded;
   begin
-    sut := JsonNumber.Create(0);
+    sut := JsonNumber.New;
 
     sut.AsExtended := 1.0 * ((Int64(1) shl 63) + 1);
   end;

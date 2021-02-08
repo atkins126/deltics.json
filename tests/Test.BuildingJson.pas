@@ -33,8 +33,8 @@ implementation
   var
     sut: IJsonObject;
   begin
-    sut := JsonObject.Create;
-    sut.Add('foo', JsonString.Create('bar'));
+    sut := JsonObject.New;
+    sut.Add('foo', JsonString('bar'));
 
     Test('sut.Count').Assert(sut.Count).Equals(1);
     Test('sut[''foo'']').AssertUtf8(sut['foo'].Value).Equals('bar');
@@ -45,8 +45,8 @@ implementation
   var
     sut: IJsonObject;
   begin
-    sut := JsonObject.Create;
-    sut.Add('foo', JsonString.Create('bar'));
+    sut := JsonObject.New;
+    sut.Add('foo', JsonString('bar'));
 
     Test('sut.Count').Assert(sut.Count).Equals(1);
     Test('sut[''foo'']').AssertUtf8(sut['foo'].Value).Equals('bar');
@@ -58,7 +58,7 @@ implementation
     sut: IJsonObject;
     v: IJsonValue;
   begin
-    sut := JsonObject.Create;
+    sut := JsonObject.New;
 
     v := sut['foo'];
 
@@ -71,12 +71,12 @@ implementation
   var
     sut: IJsonObject;
   begin
-    sut := JsonObject.Create;
-    sut.Add('foo', JsonNumber.Create(42));
+    sut := JsonObject.New;
+    sut.Add('foo', JsonNumber.AsInteger(42));
 
     Test('Count').Assert(sut.Count).Equals(1);
     Test('foo.AsInteger').Assert(sut['foo'].AsInteger).Equals(42);
-    Test('foo.AsDouble').Assert(sut['foo'].AsDouble).Equals(42.0);
+    Test('foo.AsDouble').AssertDouble(sut['foo'].AsDouble).Equals(42.0);
     Test('foo.AsString').Assert(sut['foo'].AsString).Equals('42');
   end;
 
@@ -85,7 +85,7 @@ implementation
   var
     sut: IJsonObject;
   begin
-    sut := JsonObject.Create;
+    sut := JsonObject.New;
 
     Test('sut').Assert(sut).IsNotNIL;
     Test('sut.ValueType').Assert(Ord(sut.ValueType)).Equals(Ord(jsObject));
@@ -97,7 +97,7 @@ implementation
   var
     sut: IJsonObject;
   begin
-    sut := JsonObject.Create;
+    sut := JsonObject.New;
 
     Test('foo.IsNull').Assert(sut['foo'].IsNull).IsTrue;
     Test('Count').Assert(sut.Count).Equals(0);
@@ -114,7 +114,7 @@ implementation
   var
     sut: IJsonObject;
   begin
-    sut := JsonObject.Create;
+    sut := JsonObject.New;
 
     sut['foo'].AsInteger := 42;
 

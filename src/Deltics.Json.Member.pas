@@ -16,13 +16,14 @@ interface
     TJsonMember = class(TComInterfacedObject, IJsonMember)
     // IJsonMember
     protected
-      function get_Name: Utf8String;
+      function get_Name: UnicodeString;
       function get_Value: IJsonValue;
-      procedure set_Name(const aValue: Utf8String);
+      procedure set_Name(const aValue: UnicodeString);
       procedure set_Value(const aValue: IJsonValue);
+      function ValueOrDefault(aDefault: IJsonValue): IJsonValue;
 
     private
-      fName: Utf8String;
+      fName: UnicodeString;
       fValue: IJsonValue;
     end;
 
@@ -39,7 +40,7 @@ implementation
   class function JsonMember.Create(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
   begin
     result := TJsonMember.Create;
-    result.Name   := Utf8.FromWIDE(aName);
+    result.Name   := aName;
     result.Value  := aValue;
   end;
 
@@ -47,7 +48,7 @@ implementation
 
 { TJsonMember }
 
-  function TJsonMember.get_Name: Utf8String;
+  function TJsonMember.get_Name: UnicodeString;
   begin
     result := fName;
   end;
@@ -59,7 +60,7 @@ implementation
   end;
 
 
-  procedure TJsonMember.set_Name(const aValue: Utf8String);
+  procedure TJsonMember.set_Name(const aValue: UnicodeString);
   begin
     fName := aValue;
   end;
@@ -69,6 +70,15 @@ implementation
   begin
     fValue := aValue;
   end;
+
+
+  function TJsonMember.ValueOrDefault(aDefault: IJsonValue): IJsonValue;
+  begin
+    result := fValue;
+    if result.IsNull then
+      result := aDefault;
+  end;
+
 
 
 

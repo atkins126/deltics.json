@@ -317,19 +317,13 @@ implementation
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   function TJsonValue.get_AsInt64: Int64;
-  var
-    e: Extended;
   begin
     ErrorIfNull;
 
     case ValueType of
       jsNumber,
-      jsString  : begin
-                    e       := AsExtended;
-                    result  := Trunc(e);
-                    if (e - result <> 0) then
-                      raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as Int64', [AsString]);
-                  end;
+      jsString  : if not TryStrToInt64(AsString, result) then
+                    raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as Int64', [AsString]);
 
     else
       raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as Int64', [AsString]);
@@ -339,20 +333,13 @@ implementation
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   function TJsonValue.get_AsInteger: Integer;
-  var
-    i: Int64;
   begin
     ErrorIfNull;
 
     case ValueType of
       jsNumber,
-      jsString  : begin
-                    i := AsInt64;
-                    if (i > High(Integer)) or (i < Low(integer)) then
-                      raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as an Integer', [AsString]);
-
-                    result := Integer(i);
-                  end;
+      jsString  : if not TryStrToInt(AsString, result) then
+                    raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as Integer', [AsString]);
     else
       raise EJsonConvertError.CreateFmt('''%s'' cannot be expressed as an Integer', [AsString]);
     end;

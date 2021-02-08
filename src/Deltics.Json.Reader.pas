@@ -333,7 +333,7 @@ implementation
 
         '"'       : begin
                       s := ReadString;
-                      result := JsonString.Create(s);
+                      result := JsonString.AsString(s);
                     end;
 
         '-'       : begin
@@ -345,9 +345,9 @@ implementation
                                       s := ReadString(FALSE);
 
                                       if STR.IsInteger(s) then
-                                        result := JsonNumber.Create(-1 * StrToInt(s))
+                                        result := JsonNumber.AsInt64(-1 * StrToInt64(s))
                                       else if STR.IsNumeric(s) then
-                                        result := JsonNumber.Create(-1 * StrToFloat(s))
+                                        result := JsonNumber.AsExtended(-1 * StrToFloat(s))
                                       else
                                         raise EJsonStreamError.CreateFmt('''%s'' is not a valid number', [s]);
                                     end;
@@ -360,9 +360,9 @@ implementation
                       s := ReadString(FALSE);
 
                       if STR.IsInteger(s) then
-                        result := JsonNumber.Create(StrToInt(s))
+                        result := JsonNumber.AsInt64(StrToInt(s))
                       else if STR.IsNumeric(s) then
-                        result := JsonNumber.Create(StrToFloat(s))
+                        result := JsonNumber.AsExtended(StrToFloat(s))
                       else
                         raise EJsonStreamError.CreateFmt('''%s'' is not a valid number', [s]);
                     end;
@@ -370,7 +370,7 @@ implementation
         'n', 'N'  : begin
                       s := ReadString(FALSE);
                       if SameText(s, 'null') then
-                        result := JsonNull.Create
+                        result := JsonNull.New
                       else
                         raise EJsonStreamError.CreateFmt('Expected ''null'', found ''%s''', [s]);
                     end;
@@ -379,7 +379,7 @@ implementation
         't', 'T'  : begin
                       s := ReadString(FALSE);
                       if SameText(s, 'true') or SameText(s, 'false') then
-                        result := JsonBoolean.Create(s = 'true')
+                        result := JsonBoolean.AsBoolean(s = 'true')
                       else
                         raise EJsonStreamError.CreateFmt('Expected ''true'' or ''false'', found ''%s''', [s]);
                     end;

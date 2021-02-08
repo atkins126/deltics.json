@@ -117,6 +117,10 @@ interface
 
 implementation
 
+  uses
+    Deltics.Json.Value;
+
+
 
   function JsonBoolean: Deltics.Json.Factories.JsonBoolean;
   begin

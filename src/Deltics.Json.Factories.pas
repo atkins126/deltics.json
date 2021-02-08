@@ -22,28 +22,28 @@ interface
 
     JsonBooleanFactory = class
     public
-      class function New: IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function AsBoolean(const aValue: Boolean): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function New: IJsonValue;
+      class function AsBoolean(const aValue: Boolean): IJsonValue;
     end;
     JsonBoolean = class of JsonBooleanFactory;
 
 
     JsonNullFactory = class
     public
-      class function New: IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function New: IJsonValue;
     end;
     JsonNull = class of JsonNullFactory;
 
 
     JsonNumberFactory = class
     public
-      class function New: IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function AsCardinal(const aValue: Cardinal): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function AsDouble(const aValue: Double): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function AsExtended(const aValue: Extended): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function AsInt64(const aValue: Int64): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function AsInteger(const aValue: Integer): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function AsSingle(const aValue: Single): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function New: IJsonValue;
+      class function AsCardinal(const aValue: Cardinal): IJsonValue;
+      class function AsDouble(const aValue: Double): IJsonValue;
+      class function AsExtended(const aValue: Extended): IJsonValue;
+      class function AsInt64(const aValue: Int64): IJsonValue;
+      class function AsInteger(const aValue: Integer): IJsonValue;
+      class function AsSingle(const aValue: Single): IJsonValue;
     end;
     JsonNumber = class of JsonNumberFactory;
 
@@ -58,11 +58,11 @@ interface
 
     JsonStringFactory = class
     public
-      class function New: IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function AsString(const aValue: UnicodeString): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function AsUtf8(const aValue: Utf8String): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-      class function Decode(const aValue: Utf8String): UnicodeString; {$ifdef InlineMethods} inline; {$endif}
-      class function Encode(const aValue: UnicodeString): Utf8String; {$ifdef InlineMethods} inline; {$endif}
+      class function New: IJsonValue;
+      class function AsString(const aValue: UnicodeString): IJsonValue;
+      class function AsUtf8(const aValue: Utf8String): IJsonValue;
+      class function Decode(const aValue: Utf8String): UnicodeString;
+      class function Encode(const aValue: UnicodeString): Utf8String;
     end;
     JsonString = class of JsonStringFactory;
 

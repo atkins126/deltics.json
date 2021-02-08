@@ -28,6 +28,7 @@ interface
     public
       constructor Create;
       destructor Destroy; override;
+      procedure Clear;
       property IsEmpty: Boolean read get_IsEmpty;
       property Count: Integer read get_Count;
     end;
@@ -37,12 +38,23 @@ interface
 
 implementation
 
+  uses
+    Deltics.Exceptions,
+    Deltics.Json.Array_,
+    Deltics.Json.Object_;
+
+
 
 { TJsonCollection }
 
   constructor TJsonCollection.Create;
   begin
-    inherited;
+    if self is TJsonObject then
+      inherited CreateObject
+    else if self is TJsonArray then
+      inherited CreateArray
+    else
+      raise ENotImplemented.Create(ClassName + ' is not a supported Json collection type');
 
     fItems := TInterfaceList.Create;
   end;
@@ -67,6 +79,11 @@ implementation
     result := fItems.Count;
   end;
 
+
+  procedure TJsonCollection.Clear;
+  begin
+    fItems.Clear;
+  end;
 
 
 

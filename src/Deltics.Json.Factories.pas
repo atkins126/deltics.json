@@ -12,52 +12,59 @@ interface
 
 
   type
-    JsonBoolean = class
+    JsonArrayFactory = class
     public
-      class function Create(const aValue: Boolean): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-    end;
-
-
-    JsonNull = class
-    public
-      class function Create: IJsonValue; {$ifdef InlineMethods} inline; {$endif}
-    end;
-
-
-    JsonNumber = class
-    public
-      class function Create(const aValue: Double): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-      class function Create(const aValue: Extended): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-      class function Create(const aValue: Cardinal): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-      class function Create(const aValue: Integer): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-      class function Create(const aValue: Int64): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-    end;
-
-
-    JsonArray = class
-    public
-      class function Create: IJsonArray; reintroduce;
+      class function New: IJsonArray;
       class function FromString(const aString: UnicodeString): IJsonArray;
     end;
+    JsonArray = class of JsonArrayFactory;
 
 
-    JsonObject = class
+    JsonBooleanFactory = class
     public
-      class function Create: IJsonObject; reintroduce;
+      class function New: IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function AsBoolean(const aValue: Boolean): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+    end;
+    JsonBoolean = class of JsonBooleanFactory;
+
+
+    JsonNullFactory = class
+    public
+      class function New: IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+    end;
+    JsonNull = class of JsonNullFactory;
+
+
+    JsonNumberFactory = class
+    public
+      class function New: IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function AsCardinal(const aValue: Cardinal): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function AsDouble(const aValue: Double): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function AsExtended(const aValue: Extended): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function AsInt64(const aValue: Int64): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function AsInteger(const aValue: Integer): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function AsSingle(const aValue: Single): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+    end;
+    JsonNumber = class of JsonNumberFactory;
+
+
+    JsonObjectFactory = class
+    public
+      class function New: IJsonObject; reintroduce;
       class function FromString(const aString: UnicodeString): IJsonObject;
     end;
+    JsonObject = class of JsonObjectFactory;
 
 
-    JsonString = class
+    JsonStringFactory = class
     public
-      class function Create(const aValue: AnsiString): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-      class function Create(const aValue: UnicodeString): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-    {$ifdef UNICODE}
-      class function Create(const aValue: Utf8String): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
-    {$endif}
+      class function New: IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function AsString(const aValue: UnicodeString): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
+      class function AsUtf8(const aValue: Utf8String): IJsonValue; {$ifdef InlineMethods} inline; {$endif}
       class function Decode(const aValue: Utf8String): UnicodeString; {$ifdef InlineMethods} inline; {$endif}
       class function Encode(const aValue: UnicodeString): Utf8String; {$ifdef InlineMethods} inline; {$endif}
     end;
+    JsonString = class of JsonStringFactory;
 
 
 
@@ -72,13 +79,15 @@ implementation
 
 
 
-  class function JsonArray.Create: IJsonArray;
+{ JsonArrayFactory ------------------------------------------------------------------------------- }
+
+  class function JsonArrayFactory.New: IJsonArray;
   begin
     result := TJsonArray.Create;
   end;
 
 
-  class function JsonArray.FromString(const aString: UnicodeString): IJsonArray;
+  class function JsonArrayFactory.FromString(const aString: UnicodeString): IJsonArray;
   begin
     result := Json.FromString(aString) as IJsonArray;
   end;
@@ -86,7 +95,18 @@ implementation
 
 
 
-  class function JsonBoolean.Create(const aValue: Boolean): IJsonValue;
+
+
+{ JsonBooleanFactory ----------------------------------------------------------------------------- }
+
+  class function JsonBooleanFactory.New: IJsonValue;
+  begin
+    result := TJsonValue.Create;
+    result.AsBoolean := FALSE;
+  end;
+
+
+  class function JsonBooleanFactory.AsBoolean(const aValue: Boolean): IJsonValue;
   begin
     result := TJsonValue.Create;
     result.AsBoolean := aValue;
@@ -96,7 +116,10 @@ implementation
 
 
 
-  class function JsonNull.Create: IJsonValue;
+
+{ JsonNullFactory -------------------------------------------------------------------------------- }
+
+  class function JsonNullFactory.New: IJsonValue;
   begin
     result := TJsonValue.Create;
   end;
@@ -104,52 +127,70 @@ implementation
 
 
 
-  class function JsonNumber.Create(const aValue: Cardinal): IJsonValue;
+
+{ JsonNumberFactory ------------------------------------------------------------------------------ }
+
+  class function JsonNumberFactory.New: IJsonValue;
+  begin
+    result := TJsonValue.Create;
+    result.AsInteger := 0;
+  end;
+
+
+  class function JsonNumberFactory.AsCardinal(const aValue: Cardinal): IJsonValue;
   begin
     result := TJsonValue.Create;
     result.AsCardinal := aValue;
   end;
 
 
-  class function JsonNumber.Create(const aValue: Double): IJsonValue;
+  class function JsonNumberFactory.AsDouble(const aValue: Double): IJsonValue;
   begin
     result := TJsonValue.Create;
     result.AsDouble := aValue;
   end;
 
 
-  class function JsonNumber.Create(const aValue: Extended): IJsonValue;
+  class function JsonNumberFactory.AsExtended(const aValue: Extended): IJsonValue;
   begin
     result := TJsonValue.Create;
     result.AsExtended := aValue;
   end;
 
 
-  class function JsonNumber.Create(const aValue: Integer): IJsonValue;
-  begin
-    result := TJsonValue.Create;
-    result.AsInteger := aValue;
-  end;
-
-
-  class function JsonNumber.Create(const aValue: Int64): IJsonValue;
+  class function JsonNumberFactory.AsInt64(const aValue: Int64): IJsonValue;
   begin
     result := TJsonValue.Create;
     result.AsInt64 := aValue;
   end;
 
 
+  class function JsonNumberFactory.AsInteger(const aValue: Integer): IJsonValue;
+  begin
+    result := TJsonValue.Create;
+    result.AsInteger := aValue;
+  end;
 
 
-{ JsonObject }
+  class function JsonNumberFactory.AsSingle(const aValue: Single): IJsonValue;
+  begin
+    result := TJsonValue.Create;
+    result.AsSingle := aValue;
+  end;
 
-  class function JsonObject.Create: IJsonObject;
+
+
+
+
+{ JsonObjectFactory ------------------------------------------------------------------------------ }
+
+  class function JsonObjectFactory.New: IJsonObject;
   begin
     result := TJsonObject.Create;
   end;
 
 
-  class function JsonObject.FromString(const aString: UnicodeString): IJsonObject;
+  class function JsonObjectFactory.FromString(const aString: UnicodeString): IJsonObject;
   begin
     result := Json.FromString(aString) as IJsonObject;
   end;
@@ -158,40 +199,40 @@ implementation
 
 
 
+{ JsonStringFactory ------------------------------------------------------------------------------ }
 
-  class function JsonString.Create(const aValue: AnsiString): IJsonValue;
+  class function JsonStringFactory.New: IJsonValue;
   begin
     result := TJsonValue.Create;
-    result.AsString := Wide.FromAnsi(aValue);
+    result.AsString := '';
   end;
 
 
-  class function JsonString.Create(const aValue: UnicodeString): IJsonValue;
+  class function JsonStringFactory.AsString(const aValue: UnicodeString): IJsonValue;
   begin
     result := TJsonValue.Create;
     result.AsString := aValue;
   end;
 
 
-{$ifdef UNICODE}
-  class function JsonString.Create(const aValue: Utf8String): IJsonValue;
+  class function JsonStringFactory.AsUtf8(const aValue: Utf8String): IJsonValue;
   begin
     result := TJsonValue.Create;
-    result.Value := aValue;
+    result.AsUtf8 := aValue;
   end;
-{$endif}
 
 
-  class function JsonString.Decode(const aValue: Utf8String): UnicodeString;
+  class function JsonStringFactory.Decode(const aValue: Utf8String): UnicodeString;
   begin
     result := Json.DecodeString(aValue);
   end;
 
 
-  class function JsonString.Encode(const aValue: UnicodeString): Utf8String;
+  class function JsonStringFactory.Encode(const aValue: UnicodeString): Utf8String;
   begin
     result := Json.EncodeString(aValue);
   end;
+
 
 
 

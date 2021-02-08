@@ -45,7 +45,7 @@
 interface
 
   uses
-  { deltics: }
+    Deltics.Strings,
     Deltics.Json.Exceptions,
     Deltics.Json.Factories,
     Deltics.Json.Formatter,
@@ -92,18 +92,105 @@ interface
     IJsonObject = Deltics.Json.Interfaces.IJsonObject;
     IJsonValue  = Deltics.Json.Interfaces.IJsonValue;
 
-    JsonArray   = Deltics.Json.Factories.JsonArray;
-    JsonBoolean = Deltics.Json.Factories.JsonBoolean;
-    JsonObject  = Deltics.Json.Factories.JsonObject;
-    JsonString  = Deltics.Json.Factories.JsonString;
-    JsonNull    = Deltics.Json.Factories.JsonNull;
-    JsonNumber  = Deltics.Json.Factories.JsonNumber;
-
     Json        = Deltics.Json.Utils.Json;
 
+    JsonArray   = Deltics.Json.Factories.JsonArray;
+    JsonObject  = Deltics.Json.Factories.JsonObject;
+    JsonNull    = Deltics.Json.Factories.JsonNull;
+
+
+
+  function JsonBoolean: Deltics.Json.Factories.JsonBoolean; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonBoolean(const aValue: Boolean): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+
+  function JsonNumber: Deltics.Json.Factories.JsonNumber; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonNumber(const aValue: Cardinal): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonNumber(const aValue: Double): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonNumber(const aValue: Extended): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonNumber(const aValue: Integer): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonNumber(const aValue: Int64): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+
+  function JsonString: Deltics.Json.Factories.JsonString; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonString(const aValue: UnicodeString): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
+  function JsonString(const aValue: Utf8String): IJsonValue; overload; {$ifdef InlineMethods} inline; {$endif}
 
 
 implementation
+
+
+  function JsonBoolean: Deltics.Json.Factories.JsonBoolean;
+  begin
+    result := Deltics.Json.Factories.JsonBooleanFactory;
+  end;
+
+
+  function JsonBoolean(const aValue: Boolean): IJsonValue;
+  begin
+    result := JsonBoolean.AsBoolean(aValue);
+  end;
+
+
+
+
+
+  function JsonNumber: Deltics.Json.Factories.JsonNumber;
+  begin
+    result := Deltics.Json.Factories.JsonNumberFactory;
+  end;
+
+
+  function JsonNumber(const aValue: Cardinal): IJsonValue;
+  begin
+    result := JsonNumber.AsCardinal(aValue);
+  end;
+
+
+  function JsonNumber(const aValue: Double): IJsonValue;
+  begin
+    result := JsonNumber.AsDouble(aValue);
+  end;
+
+
+  function JsonNumber(const aValue: Extended): IJsonValue;
+  begin
+    result := JsonNumber.AsExtended(aValue);
+  end;
+
+
+  function JsonNumber(const aValue: Int64): IJsonValue;
+  begin
+    result := JsonNumber.AsInt64(aValue);
+  end;
+
+
+  function JsonNumber(const aValue: Integer): IJsonValue;
+  begin
+    result := JsonNumber.AsInteger(aValue);
+  end;
+
+
+
+
+
+
+
+
+  function JsonString: Deltics.Json.Factories.JsonString;
+  begin
+    result := Deltics.Json.Factories.JsonStringFactory;
+  end;
+
+
+  function JsonString(const aValue: UnicodeString): IJsonValue;
+  begin
+    result := JsonString.AsString(aValue);
+  end;
+
+
+  function JsonString(const aValue: Utf8String): IJsonValue;
+  begin
+    result := JsonString.Asutf8(aValue);
+  end;
 
 
 

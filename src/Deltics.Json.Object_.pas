@@ -15,93 +15,112 @@ interface
 
   type
     TJsonObject = class(TJsonCollection, IJsonObject)
-    // IJsonValue
-    protected
-      function get_AsString: UnicodeString; override;
-      procedure set_AsString(const aValue: UnicodeString); override;
-
     // IJsonObject
     protected
       function get_Value(const aName: UnicodeString): IJsonValue;
       function get_Item(const aIndex: Integer): IJsonMember;
     public
-      procedure Add(const aName: UnicodeString; const aValue: IJsonValue);
+      function Add(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
+      function Contains(const aName: UnicodeString): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aMember: IJsonMember): Boolean; overload;
       property Value[const aName: UnicodeString]: IJsonValue read get_Value; default;
       property Items[const aIndex: Integer]: IJsonMember read get_Item;
+
+    protected
+      function DoGetAsString: UnicodeString; override;
+      procedure DoSetAsString(const aValue: UnicodeString); override;
+      function InternalAdd(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
     end;
 
 
-    JsonObject = class
-    public
-      class function Create: IJsonObject; reintroduce;
-    end;
 
 
 implementation
 
   uses
-    Deltics.Json.Member;
+    Deltics.Json.Exceptions,
+    Deltics.Json.Member,
+    Deltics.Json.MemberValue,
+    Deltics.Json.Value;
 
 
-
-
-
-{ JsonObject }
-
-  class function JsonObject.Create: IJsonObject;
-  begin
-    result := TJsonObject.Create;
-  end;
 
 
 
 { TJsonObject }
 
-  procedure TJsonObject.Add(const aName: UnicodeString;
-                            const aValue: IJsonValue);
+  function TJsonObject.Add(const aName: UnicodeString;
+                           const aValue: IJsonValue): IJsonMember;
   begin
-    inherited Items.Add(JsonMember.Create(aName, aValue));
+    result := InternalAdd(aName, aValue);
   end;
 
 
-  function TJsonObject.get_AsString: UnicodeString;
+  function TJsonObject.Contains(const aName: UnicodeString): Boolean;
+  var
+    notUsed: IJsonMember;
   begin
+    result := Contains(aName, notUsed);
+  end;
 
+
+  function TJsonObject.Contains(const aName: UnicodeString;
+                                var   aMember: IJsonMember): Boolean;
+  var
+    i: Integer;
+  begin
+    result := TRUE;
+
+    for i := 0 to Pred(Count) do
+    begin
+      aMember := Items[i];
+      if aMember.Name = aName then
+        EXIT;
+    end;
+
+    aMember := NIL;
+    result  := FALSE;
   end;
 
 
   function TJsonObject.get_Value(const aName: UnicodeString): IJsonValue;
-  var
-    i: Integer;
-    name: Utf8String;
-    item: IJsonMember;
   begin
-    name := Utf8.FromWide(aName);
+    result := TJsonMemberValue.Create(self as IJsonObject, aName)
+  end;
 
-    for i := 0 to Pred(Count) do
+
+  function TJsonObject.DoGetAsString: UnicodeString;
+  begin
+    // TODO
+  end;
+
+
+  procedure TJsonObject.DoSetAsString(const aValue: UnicodeString);
+  begin
+    inherited;
+
+    // TODO
+  end;
+
+
+  function TJsonObject.InternalAdd(const aName: UnicodeString;
+                                   const aValue: IJsonValue): IJsonMember;
+  begin
+    if Contains(aName, result) then
     begin
-      item := Items[i];
-      if item.Name = name then
-      begin
-        result := item.Value;
-        EXIT;
-      end;
+      result.Value := aValue;
+      EXIT;
     end;
 
-    result := NIL;
+    result := JsonMember.Create(aName, aValue);
+
+    inherited Items.Add(result);
   end;
 
 
   function TJsonObject.get_Item(const aIndex: Integer): IJsonMember;
   begin
     result := inherited Items[aIndex] as IJsonMember;
-  end;
-
-
-  procedure TJsonObject.set_AsString(const aValue: UnicodeString);
-  begin
-    inherited;
-
   end;
 
 

@@ -47,7 +47,7 @@ interface
   uses
   { deltics: }
     Deltics.Datetime,
-    Deltics.IO.Text,
+    Deltics.io.Text,
     Deltics.Strings,
     Deltics.Json.Exceptions,
     Deltics.Json.Factories,
@@ -100,11 +100,11 @@ implementation
           item := aArray.Items[i];
 
           if aFormat in [jfStandard, jfConfig] then
-            result := result + Utf8.FromString(StringOfChar(' ', aIndent));
+            result := result + Utf8.StringOf(' ', aIndent);
 
           if NOT item.IsNull then
             case item.ValueType of
-              jsString  : result := result + JsonString.Encode(item.AsString);
+              jsString  : result := result + JsonString.EncodeUtf8(item.AsString);
 
               jsArray   : begin
                             if aFormat in [jfStandard, jfConfig] then
@@ -118,7 +118,7 @@ implementation
                             result := result + ObjectToString(item as IJsonObject, aIndent + 2);
                           end;
             else
-              result := result + item.Value;
+              result := result + item.AsUtf8;
             end
           else
           begin
@@ -174,7 +174,7 @@ implementation
           if (aFormat = jfConfig) then
             result := result + Utf8.FromString(member.Name)
           else
-            result := result + JsonString.Encode(member.Name);
+            result := result + JsonString.EncodeUtf8(member.Name);
 
           result := result + ':';
           if (aFormat = jfConfig) then
@@ -184,11 +184,11 @@ implementation
             result := result + 'null'
           else
             case value.ValueType of
-              jsString  : result := result + JsonString.Encode(value.AsString);
+              jsString  : result := result + JsonString.EncodeUtf8(value.AsString);
               jsArray   : result := result + ArrayToString(value as IJsonArray, aIndent + 4);
               jsObject  : result := result + ObjectToString(value as IJsonObject, aIndent + 4);
             else
-              result := result + value.Value;
+              result := result + value.AsUtf8;
             end;
 
           result := result + ',';
@@ -212,9 +212,9 @@ implementation
     case aValue.ValueType of
       jsArray   : result := ArrayToString(aValue as IJsonArray, 0);
       jsObject  : result := ObjectToString(aValue as IJsonObject, 0);
-      jsString  : result := JsonString.Encode(aValue.AsString);
+      jsString  : result := JsonString.EncodeUtf8(aValue.AsString);
     else
-      result := aValue.Value;
+      result := aValue.AsUtf8;
     end;
   end;
 

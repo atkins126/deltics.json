@@ -36,7 +36,6 @@ interface
       function get_AsString: UnicodeString;
       function get_AsUtf8: UTF8String;
       function get_IsNull: Boolean;
-      function get_Value: Utf8String;
       function get_ValueType: TValueType;
       procedure set_AsBoolean(const aValue: Boolean);
       procedure set_AsCardinal(const aValue: Cardinal);
@@ -185,12 +184,6 @@ implementation
   function TJsonMemberValue.get_IsNull: Boolean;
   begin
     result := fValue.IsNull;
-  end;
-
-
-  function TJsonMemberValue.get_Value: Utf8String;
-  begin
-    result := fValue.Value;
   end;
 
 

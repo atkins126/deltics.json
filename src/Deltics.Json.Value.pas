@@ -34,7 +34,6 @@ interface
       function get_AsString: UnicodeString;
       function get_AsUtf8: Utf8String;
       function get_IsNull: Boolean;
-      function get_Value: Utf8String; overload;
       function get_ValueType: TValueType;
       procedure set_AsBoolean(const aValue: Boolean);
       procedure set_AsCardinal(const aValue: Cardinal); virtual;
@@ -51,9 +50,8 @@ interface
       procedure set_AsUtf8(const aValue: Utf8String);
 
     private
-      fAsString: UnicodeString;
       fIsNull: Boolean;
-      fValue: Utf8String;
+      fValue: UnicodeString;
       fValueType: TValueType;
     protected
       constructor CreateArray;
@@ -64,9 +62,8 @@ interface
       procedure SetValue(const aValueType: TValueType; const aValue: Utf8String); overload;
     public
       constructor Create;
-      property AsString: UnicodeString read fAsString write set_AsString;
+      property AsString: UnicodeString read fValue write set_AsString;
       property IsNull: Boolean read fIsNull;
-      property Value: Utf8String read get_Value;
       property ValueType: TValueType read fValueType;
     end;
 
@@ -138,7 +135,7 @@ implementation
     ErrorIfNull;
 
     case ValueType of
-      jsBoolean : result := (Value = 'true');
+      jsBoolean : result := (AsString = 'true');
       jsString  : begin
                     s := Str.Lowercase(AsString);
                     if (s = 'true') then        result := TRUE
@@ -345,7 +342,7 @@ implementation
   function TJsonValue.get_AsString: UnicodeString;
   begin
     ErrorIfNull;
-    result := fAsString;
+    result := fValue;
   end;
 
 
@@ -353,7 +350,7 @@ implementation
   function TJsonValue.get_AsUtf8: Utf8String;
   begin
     ErrorIfNull;
-    result := fValue;
+    result := Utf8.FromWide(fValue);
   end;
 
 
@@ -361,14 +358,6 @@ implementation
   function TJsonValue.get_IsNull: Boolean;
   begin
     result := fIsNull;
-  end;
-
-
-  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJsonValue.get_Value: Utf8String;
-  begin
-    ErrorIfNull;
-    result := fValue;
   end;
 
 
@@ -382,7 +371,6 @@ implementation
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.SetNull;
   begin
-    fAsString   := '';
     fIsNull     := TRUE;
     fValue      := '';
     fValueType  := jsNull;
@@ -393,9 +381,8 @@ implementation
   procedure TJsonValue.SetValue(const aValueType: TValueType;
                                 const aValue: Utf8String);
   begin
-    fAsString   := Wide.FromUtf8(aValue);
     fValueType  := aValueType;
-    fValue      := aValue;
+    fValue      := Wide.FromUtf8(aValue);
     fIsNull     := FALSE;
   end;
 
@@ -404,9 +391,8 @@ implementation
   procedure TJsonValue.SetValue(const aValueType: TValueType;
                                 const aValue: UnicodeString);
   begin
-    fAsString   := aValue;
     fValueType  := aValueType;
-    fValue      := Utf8.FromString(aValue);
+    fValue      := aValue;
     fIsNull     := FALSE;
   end;
 

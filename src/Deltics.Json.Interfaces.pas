@@ -41,7 +41,6 @@ interface
       function get_AsString: UnicodeString;
       function get_AsUtf8: Utf8String;
       function get_IsNull: Boolean;
-      function get_Value: Utf8String;
       function get_ValueType: TValueType;
       procedure set_AsBoolean(const aValue: Boolean);
       procedure set_AsCardinal(const aValue: Cardinal);
@@ -72,7 +71,6 @@ interface
       property AsString: UnicodeString read get_AsString write set_AsString;
       property AsUtf8: Utf8String read get_AsUtf8 write set_AsUtf8;
       property IsNull: Boolean read get_IsNull;
-      property Value: Utf8String read get_Value;
       property ValueType: TValueType read get_ValueType;
     end;
 

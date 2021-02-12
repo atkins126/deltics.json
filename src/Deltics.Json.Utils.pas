@@ -20,7 +20,8 @@ interface
 
     Json = class
       class function DecodeDate(const aString: UnicodeString): TDateTime;
-      class function DecodeString(const aValue: Utf8String): UnicodeString;
+      class function DecodeString(const aValue: UnicodeString): UnicodeString; overload;
+      class function DecodeString(const aValue: Utf8String): UnicodeString; overload;
       class function EncodeDate(const aDate: TDate; const aAccuracy: TJsonDatePart = dpDay): UnicodeString; overload;
       class function EncodeDate(const aYear: Word): UnicodeString; overload;
       class function EncodeDate(const aYear, aMonth: Word): UnicodeString; overload;
@@ -29,7 +30,8 @@ interface
       class function EncodeDateTime(const aDateTime: TDateTime; const aDateAccuracy: TJsonDatePart): UnicodeString; overload;
       class function EncodeDateTime(const aDateTime: TDateTime; const aOffset: SmallInt): UnicodeString; overload;
       class function EncodeDateTime(const aDateTime: TDateTime; const aDateAccuracy: TJsonDatePart; const aOffset: SmallInt): UnicodeString; overload;
-      class function EncodeString(const aString: UnicodeString): Utf8String;
+      class function EncodeString(const aString: UnicodeString): UnicodeString;
+      class function EncodeUtf8(const aValue: UnicodeString): Utf8String;
 
       class function FromFile(const aFilename: String): IJsonValue;
       class function FromStream(aStream: TStream): IJsonValue; overload;
@@ -226,34 +228,29 @@ implementation
   end;
 
 
-
-
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function Json.DecodeString(const aValue: Utf8String): UnicodeString;
+  class function Json.DecodeString(const aValue: UnicodeString): UnicodeString;
 
     function UnescapeUnicode(var aI: Integer): WideChar;
     var
-      buf: array[0..3] of Utf8Char;
+      buf: array[0..3] of WideChar;
     begin
-      buf[2] := Utf8Char(aValue[aI + 1]);
-      buf[3] := Utf8Char(aValue[aI + 2]);
-      buf[0] := Utf8Char(aValue[aI + 3]);
-      buf[1] := Utf8Char(aValue[aI + 4]);
+      buf[2] := aValue[aI + 1];
+      buf[3] := aValue[aI + 2];
+      buf[0] := aValue[aI + 3];
+      buf[1] := aValue[aI + 4];
 
-      HexToBin(PANSIChar(@buf), result, 4);
+      HexToBin(PWideChar(@buf), result, 4);
 
       Inc(aI, 4);
     end;
 
   var
-    c: Utf8Char;
-    wc: WideChar;
+    c: WideChar;
     quoted: Boolean;
     i, ri: Integer;
     len: Integer;
   begin
-    wc := #0;
-
     result := '';
     if aValue = '' then
       EXIT;
@@ -287,14 +284,14 @@ implementation
           c := aValue[i];
 
           case c of
-            '"', '\', '/' : wc := WideChar(c);
-            'b' : wc := WideChar(#8);
-            't' : wc := WideChar(#9);
-            'n' : wc := WideChar(#10);
-            'f' : wc := WideChar(#12);
-            'r' : wc := WideChar(#13);
+            '"', '\', '/' :; { NO-OP: c = c }
+            'b' : c := #8;
+            't' : c := #9;
+            'n' : c := #10;
+            'f' : c := #12;
+            'r' : c := #13;
             'u' : if (i + 4) <= len then
-                    wc := UnescapeUnicode(i)
+                    c := UnescapeUnicode(i)
                   else
                     raise EJsonFormatError.Create('Incomplete Unicode escape sequence');
           else
@@ -302,7 +299,7 @@ implementation
           end;
         end;
 
-        result[ri] := wc;
+        result[ri] := c;
         Inc(ri);
         Inc(i);
       end;
@@ -314,54 +311,68 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function Json.EncodeString(const aString: UnicodeString): Utf8String;
+  class function Json.DecodeString(const aValue: Utf8String): UnicodeString;
+  begin
+    // TODO: Decode char-wise rather than converting the entire string and then decoding
+    result := DecodeString(Wide.FromUtf8(aValue));
+  end;
 
-  // TODO: I don't think this handles surrogate pairs properly
 
-    procedure EscapeUnicode(const aChar: WideChar);
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class function Json.EncodeString(const aString: UnicodeString): UnicodeString;
+
+    procedure EscapeUnicode(const aChar: WideChar); overload;
     var
       i: Integer;
-      buf: array[0..3] of Char;
+      buf: array[0..3] of WideChar;
     begin
-//      Classes.BinToHex(@aChar, PWideChar(@buf), 2);
+      Classes.BinToHex(@aChar, PWideChar(@buf), 4);
 
       i := Length(result);
       SetLength(result, i + 6);
 
       result[i + 1] := '\';
       result[i + 2] := 'u';
-      result[i + 3] := Utf8Char(buf[2]);
-      result[i + 4] := Utf8Char(buf[3]);
-      result[i + 5] := Utf8Char(buf[0]);
-      result[i + 6] := Utf8Char(buf[1]);
+      result[i + 3] := buf[2];
+      result[i + 4] := buf[3];
+      result[i + 5] := buf[0];
+      result[i + 6] := buf[1];
     end;
 
   var
     i: Integer;
     c: WideChar;
   begin
-    result := '"';
+    result  := '"';
 
     for i := 1 to Length(aString) do
     begin
       c := aString[i];
 
       case c of
-        '"', '/', '\' : result := Utf8.Append(Utf8.Append(result, '\'), Utf8Char(c));
-        ANSIChar(#8)  : result := result + '\b';
-        ANSIChar(#9)  : result := result + '\t';
-        ANSIChar(#10) : result := result + '\n';
-        ANSIChar(#12) : result := result + '\f';
-        ANSIChar(#13) : result := result + '\r';
+        '"', '/', '\' : result := result + '\' + c;
+        #8  : result := result + '\b';
+        #9  : result := result + '\t';
+        #10 : result := result + '\n';
+        #12 : result := result + '\f';
+        #13 : result := result + '\r';
       else
-        if (Word(c) > $7f) then
+        // TODO: Escape encoding of Unicode should be optional for anything other than non-printables
+        if (Word(c) < 32) or (Word(c) > 127) then
           EscapeUnicode(c)
         else
-          result := Utf8.Append(result, Utf8Char(c));
+          result := result + c;
       end;
     end;
 
     result := result + '"';
+  end;
+
+
+  class function Json.EncodeUtf8(const aValue: UnicodeString): Utf8String;
+  begin
+    // TODO: Encode as Utf8 char-wise rather than encoding then converting
+    result := Utf8.FromWIDE(EncodeString(aValue));
   end;
 
 

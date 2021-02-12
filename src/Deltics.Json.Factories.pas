@@ -61,8 +61,10 @@ interface
       class function New: IJsonValue;
       class function AsString(const aValue: UnicodeString): IJsonValue;
       class function AsUtf8(const aValue: Utf8String): IJsonValue;
-      class function Decode(const aValue: Utf8String): UnicodeString;
-      class function Encode(const aValue: UnicodeString): Utf8String;
+      class function Decode(const aValue: UnicodeString): UnicodeString; overload;
+      class function Decode(const aValue: Utf8String): UnicodeString; overload;
+      class function Encode(const aValue: UnicodeString): UnicodeString;
+      class function EncodeUtf8(const aValue: UnicodeString): Utf8String;
     end;
     JsonString = class of JsonStringFactory;
 
@@ -228,10 +230,23 @@ implementation
   end;
 
 
-  class function JsonStringFactory.Encode(const aValue: UnicodeString): Utf8String;
+  class function JsonStringFactory.Decode(const aValue: UnicodeString): UnicodeString;
+  begin
+    result := Json.DecodeString(aValue);
+  end;
+
+
+  class function JsonStringFactory.Encode(const aValue: UnicodeString): UnicodeString;
   begin
     result := Json.EncodeString(aValue);
   end;
+
+
+  class function JsonStringFactory.EncodeUtf8(const aValue: UnicodeString): Utf8String;
+  begin
+    result := Json.EncodeUtf8(aValue);
+  end;
+
 
 
 

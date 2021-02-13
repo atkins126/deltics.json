@@ -240,7 +240,7 @@ implementation
       buf[0] := aValue[aI + 3];
       buf[1] := aValue[aI + 4];
 
-      HexToBin(PWideChar(@buf), result, 4);
+      HexToBin(PWideChar(@buf), result, 2);
 
       Inc(aI, 4);
     end;
@@ -321,29 +321,20 @@ implementation
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   class function Json.EncodeString(const aString: UnicodeString): UnicodeString;
 
-    procedure EscapeUnicode(const aChar: WideChar); overload;
+    function EscapeUnicode(const aChar: WideChar): UnicodeString;
     var
-      i: Integer;
       buf: array[0..3] of WideChar;
     begin
-      Classes.BinToHex(@aChar, PWideChar(@buf), 4);
+      Classes.BinToHex(@aChar, PWideChar(@buf), 2);
 
-      i := Length(result);
-      SetLength(result, i + 6);
-
-      result[i + 1] := '\';
-      result[i + 2] := 'u';
-      result[i + 3] := buf[2];
-      result[i + 4] := buf[3];
-      result[i + 5] := buf[0];
-      result[i + 6] := buf[1];
+      result := '\u' + buf[2] + buf[3] + buf[0] + buf[1];
     end;
 
   var
     i: Integer;
     c: WideChar;
   begin
-    result  := '"';
+    result := '"';
 
     for i := 1 to Length(aString) do
     begin
@@ -359,7 +350,7 @@ implementation
       else
         // TODO: Escape encoding of Unicode should be optional for anything other than non-printables
         if (Word(c) < 32) or (Word(c) > 127) then
-          EscapeUnicode(c)
+          result := result + EscapeUnicode(c)
         else
           result := result + c;
       end;

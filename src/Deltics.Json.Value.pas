@@ -16,7 +16,7 @@ interface
 
 
   type
-    TJsonValue = class(TComInterfacedObject, IJsonValue)
+    TJsonValue = class(TComInterfacedObject, IJsonMutableValue)
     // IJsonValue
     protected
       function get_AsBoolean: Boolean;

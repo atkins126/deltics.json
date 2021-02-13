@@ -60,7 +60,7 @@ interface
 
 
     JsonFormatter = class
-      class function Format(const aValue: IJsonValue; const aFormat: TJsonFormat): Utf8String;
+      class function Format(const aValue: IJsonMutableValue; const aFormat: TJsonFormat): Utf8String;
     end;
 
 
@@ -71,7 +71,7 @@ implementation
 
 { JsonFormatter }
 
-  class function JsonFormatter.Format(const aValue: IJsonValue;
+  class function JsonFormatter.Format(const aValue: IJsonMutableValue;
                                       const aFormat: TJsonFormat): Utf8String;
 
     function ObjectToString(const aObject: IJsonObject;
@@ -81,7 +81,7 @@ implementation
                            const aIndent: Integer): Utf8String;
     var
       i: Integer;
-      item: IJsonValue;
+      item: IJsonMutableValue;
     begin
       if (aArray.Count = 0) then
       begin
@@ -150,7 +150,7 @@ implementation
     var
       i: Integer;
       member: IJsonMember;
-      value: IJsonValue;
+      value: IJsonMutableValue;
     begin
       if (aObject.Count = 0) then
       begin

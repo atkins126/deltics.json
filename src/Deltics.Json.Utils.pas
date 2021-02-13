@@ -33,9 +33,9 @@ interface
       class function EncodeString(const aString: UnicodeString): UnicodeString;
       class function EncodeUtf8(const aValue: UnicodeString): Utf8String;
 
-      class function FromFile(const aFilename: String): IJsonValue;
-      class function FromStream(aStream: TStream): IJsonValue; overload;
-      class function FromString(const aString: String): IJsonValue; overload;
+      class function FromFile(const aFilename: String): IJsonMutableValue;
+      class function FromStream(aStream: TStream): IJsonMutableValue; overload;
+      class function FromString(const aString: String): IJsonMutableValue; overload;
 
     end;
 
@@ -367,7 +367,7 @@ implementation
   end;
 
 
-  class function Json.FromFile(const aFilename: String): IJsonValue;
+  class function Json.FromFile(const aFilename: String): IJsonMutableValue;
   var
     src: TFileStream;
   begin
@@ -381,7 +381,7 @@ implementation
 
 
 
-  class function Json.FromStream(aStream: TStream): IJsonValue;
+  class function Json.FromStream(aStream: TStream): IJsonMutableValue;
   var
     source: IUnicodeReader;
     reader: IJsonReader;
@@ -394,7 +394,7 @@ implementation
 
 
 
-  class function Json.FromString(const aString: String): IJsonValue;
+  class function Json.FromString(const aString: String): IJsonMutableValue;
   var
     source: IUnicodeReader;
     reader: IJsonReader;

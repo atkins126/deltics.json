@@ -88,9 +88,10 @@ interface
 
 
   type
-    IJsonArray  = Deltics.Json.Interfaces.IJsonArray;
-    IJsonObject = Deltics.Json.Interfaces.IJsonObject;
-    IJsonValue  = Deltics.Json.Interfaces.IJsonValue;
+    IJsonArray        = Deltics.Json.Interfaces.IJsonArray;
+    IJsonMutableValue = Deltics.Json.Interfaces.IJsonMutableValue;
+    IJsonObject       = Deltics.Json.Interfaces.IJsonObject;
+    IJsonValue        = Deltics.Json.Interfaces.IJsonValue;
 
     Json        = Deltics.Json.Utils.Json;
 
@@ -101,18 +102,18 @@ interface
 
 
   function JsonBoolean: Deltics.Json.Factories.JsonBoolean; overload;
-  function JsonBoolean(const aValue: Boolean): IJsonValue; overload;
+  function JsonBoolean(const aValue: Boolean): IJsonMutableValue; overload;
 
   function JsonNumber: Deltics.Json.Factories.JsonNumber; overload;
-  function JsonNumber(const aValue: Cardinal): IJsonValue; overload;
-  function JsonNumber(const aValue: Double): IJsonValue; overload;
-  function JsonNumber(const aValue: Extended): IJsonValue; overload;
-  function JsonNumber(const aValue: Integer): IJsonValue; overload;
-  function JsonNumber(const aValue: Int64): IJsonValue; overload;
+  function JsonNumber(const aValue: Cardinal): IJsonMutableValue; overload;
+  function JsonNumber(const aValue: Double): IJsonMutableValue; overload;
+  function JsonNumber(const aValue: Extended): IJsonMutableValue; overload;
+  function JsonNumber(const aValue: Integer): IJsonMutableValue; overload;
+  function JsonNumber(const aValue: Int64): IJsonMutableValue; overload;
 
   function JsonString: Deltics.Json.Factories.JsonString; overload;
-  function JsonString(const aValue: UnicodeString): IJsonValue; overload;
-  function JsonString(const aValue: Utf8String): IJsonValue; overload;
+  function JsonString(const aValue: UnicodeString): IJsonMutableValue; overload;
+  function JsonString(const aValue: Utf8String): IJsonMutableValue; overload;
 
 
 implementation
@@ -128,7 +129,7 @@ implementation
   end;
 
 
-  function JsonBoolean(const aValue: Boolean): IJsonValue;
+  function JsonBoolean(const aValue: Boolean): IJsonMutableValue;
   begin
     result := JsonBoolean.AsBoolean(aValue);
   end;
@@ -143,31 +144,31 @@ implementation
   end;
 
 
-  function JsonNumber(const aValue: Cardinal): IJsonValue;
+  function JsonNumber(const aValue: Cardinal): IJsonMutableValue;
   begin
     result := JsonNumber.AsCardinal(aValue);
   end;
 
 
-  function JsonNumber(const aValue: Double): IJsonValue;
+  function JsonNumber(const aValue: Double): IJsonMutableValue;
   begin
     result := JsonNumber.AsDouble(aValue);
   end;
 
 
-  function JsonNumber(const aValue: Extended): IJsonValue;
+  function JsonNumber(const aValue: Extended): IJsonMutableValue;
   begin
     result := JsonNumber.AsExtended(aValue);
   end;
 
 
-  function JsonNumber(const aValue: Int64): IJsonValue;
+  function JsonNumber(const aValue: Int64): IJsonMutableValue;
   begin
     result := JsonNumber.AsInt64(aValue);
   end;
 
 
-  function JsonNumber(const aValue: Integer): IJsonValue;
+  function JsonNumber(const aValue: Integer): IJsonMutableValue;
   begin
     result := JsonNumber.AsInteger(aValue);
   end;
@@ -185,13 +186,13 @@ implementation
   end;
 
 
-  function JsonString(const aValue: UnicodeString): IJsonValue;
+  function JsonString(const aValue: UnicodeString): IJsonMutableValue;
   begin
     result := JsonString.AsString(aValue);
   end;
 
 
-  function JsonString(const aValue: Utf8String): IJsonValue;
+  function JsonString(const aValue: Utf8String): IJsonMutableValue;
   begin
     result := JsonString.Asutf8(aValue);
   end;

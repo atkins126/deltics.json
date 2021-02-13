@@ -31,7 +31,7 @@ interface
       constructor Create(const aSource: IUnicodeReader);
       function ReadArray: IJsonArray;
       function ReadObject: IJsonObject;
-      function ReadValue: IJsonValue;
+      function ReadValue: IJsonMutableValue;
     end;
 
 
@@ -94,7 +94,7 @@ implementation
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   function TJsonReader.ReadArray: IJsonArray;
   var
-    value: IJsonValue;
+    value: IJsonMutableValue;
   begin
     if ReadRealChar <> '[' then
       raise EJsonStreamError.Create('Expected ''[''');
@@ -138,7 +138,7 @@ implementation
   var
     c: WideChar;
     name: UnicodeString;
-    value: IJsonValue;
+    value: IJsonMutableValue;
   begin
     if ReadRealChar <> '{' then
       raise EJsonStreamError.Create('Expected ''{''');
@@ -317,7 +317,7 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJsonReader.ReadValue: IJsonValue;
+  function TJsonReader.ReadValue: IJsonMutableValue;
   var
     c: WideChar;
     s: UnicodeString;

@@ -17,14 +17,14 @@ interface
     // IJsonMember
     protected
       function get_Name: UnicodeString;
-      function get_Value: IJsonValue;
+      function get_Value: IJsonMutableValue;
       procedure set_Name(const aValue: UnicodeString);
-      procedure set_Value(const aValue: IJsonValue);
-      function ValueOrDefault(aDefault: IJsonValue): IJsonValue;
+      procedure set_Value(const aValue: IJsonMutableValue);
+      function ValueOrDefault(aDefault: IJsonMutableValue): IJsonMutableValue;
 
     private
       fName: UnicodeString;
-      fValue: IJsonValue;
+      fValue: IJsonMutableValue;
     end;
 
 
@@ -37,11 +37,12 @@ implementation
 
 { JsonMember }
 
-  class function JsonMember.Create(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
+  class function JsonMember.Create(const aName: UnicodeString;
+                                   const aValue: IJsonValue): IJsonMember;
   begin
     result := TJsonMember.Create;
     result.Name   := aName;
-    result.Value  := aValue;
+    result.Value  := aValue as IJsonMutableValue;
   end;
 
 
@@ -54,7 +55,7 @@ implementation
   end;
 
 
-  function TJsonMember.get_Value: IJsonValue;
+  function TJsonMember.get_Value: IJsonMutableValue;
   begin
     result := fValue;
   end;
@@ -66,13 +67,13 @@ implementation
   end;
 
 
-  procedure TJsonMember.set_Value(const aValue: IJsonValue);
+  procedure TJsonMember.set_Value(const aValue: IJsonMutableValue);
   begin
     fValue := aValue;
   end;
 
 
-  function TJsonMember.ValueOrDefault(aDefault: IJsonValue): IJsonValue;
+  function TJsonMember.ValueOrDefault(aDefault: IJsonMutableValue): IJsonMutableValue;
   begin
     result := fValue;
     if result.IsNull then

@@ -22,28 +22,28 @@ interface
 
     JsonBooleanFactory = class
     public
-      class function New: IJsonValue;
-      class function AsBoolean(const aValue: Boolean): IJsonValue;
+      class function New: IJsonMutableValue;
+      class function AsBoolean(const aValue: Boolean): IJsonMutableValue;
     end;
     JsonBoolean = class of JsonBooleanFactory;
 
 
     JsonNullFactory = class
     public
-      class function New: IJsonValue;
+      class function New: IJsonMutableValue;
     end;
     JsonNull = class of JsonNullFactory;
 
 
     JsonNumberFactory = class
     public
-      class function New: IJsonValue;
-      class function AsCardinal(const aValue: Cardinal): IJsonValue;
-      class function AsDouble(const aValue: Double): IJsonValue;
-      class function AsExtended(const aValue: Extended): IJsonValue;
-      class function AsInt64(const aValue: Int64): IJsonValue;
-      class function AsInteger(const aValue: Integer): IJsonValue;
-      class function AsSingle(const aValue: Single): IJsonValue;
+      class function New: IJsonMutableValue;
+      class function AsCardinal(const aValue: Cardinal): IJsonMutableValue;
+      class function AsDouble(const aValue: Double): IJsonMutableValue;
+      class function AsExtended(const aValue: Extended): IJsonMutableValue;
+      class function AsInt64(const aValue: Int64): IJsonMutableValue;
+      class function AsInteger(const aValue: Integer): IJsonMutableValue;
+      class function AsSingle(const aValue: Single): IJsonMutableValue;
     end;
     JsonNumber = class of JsonNumberFactory;
 
@@ -58,9 +58,9 @@ interface
 
     JsonStringFactory = class
     public
-      class function New: IJsonValue;
-      class function AsString(const aValue: UnicodeString): IJsonValue;
-      class function AsUtf8(const aValue: Utf8String): IJsonValue;
+      class function New: IJsonMutableValue;
+      class function AsString(const aValue: UnicodeString): IJsonMutableValue;
+      class function AsUtf8(const aValue: Utf8String): IJsonMutableValue;
       class function Decode(const aValue: UnicodeString): UnicodeString; overload;
       class function Decode(const aValue: Utf8String): UnicodeString; overload;
       class function Encode(const aValue: UnicodeString): UnicodeString;
@@ -101,14 +101,14 @@ implementation
 
 { JsonBooleanFactory ----------------------------------------------------------------------------- }
 
-  class function JsonBooleanFactory.New: IJsonValue;
+  class function JsonBooleanFactory.New: IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsBoolean := FALSE;
   end;
 
 
-  class function JsonBooleanFactory.AsBoolean(const aValue: Boolean): IJsonValue;
+  class function JsonBooleanFactory.AsBoolean(const aValue: Boolean): IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsBoolean := aValue;
@@ -121,7 +121,7 @@ implementation
 
 { JsonNullFactory -------------------------------------------------------------------------------- }
 
-  class function JsonNullFactory.New: IJsonValue;
+  class function JsonNullFactory.New: IJsonMutableValue;
   begin
     result := TJsonValue.Create;
   end;
@@ -132,49 +132,49 @@ implementation
 
 { JsonNumberFactory ------------------------------------------------------------------------------ }
 
-  class function JsonNumberFactory.New: IJsonValue;
+  class function JsonNumberFactory.New: IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsInteger := 0;
   end;
 
 
-  class function JsonNumberFactory.AsCardinal(const aValue: Cardinal): IJsonValue;
+  class function JsonNumberFactory.AsCardinal(const aValue: Cardinal): IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsCardinal := aValue;
   end;
 
 
-  class function JsonNumberFactory.AsDouble(const aValue: Double): IJsonValue;
+  class function JsonNumberFactory.AsDouble(const aValue: Double): IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsDouble := aValue;
   end;
 
 
-  class function JsonNumberFactory.AsExtended(const aValue: Extended): IJsonValue;
+  class function JsonNumberFactory.AsExtended(const aValue: Extended): IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsExtended := aValue;
   end;
 
 
-  class function JsonNumberFactory.AsInt64(const aValue: Int64): IJsonValue;
+  class function JsonNumberFactory.AsInt64(const aValue: Int64): IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsInt64 := aValue;
   end;
 
 
-  class function JsonNumberFactory.AsInteger(const aValue: Integer): IJsonValue;
+  class function JsonNumberFactory.AsInteger(const aValue: Integer): IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsInteger := aValue;
   end;
 
 
-  class function JsonNumberFactory.AsSingle(const aValue: Single): IJsonValue;
+  class function JsonNumberFactory.AsSingle(const aValue: Single): IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsSingle := aValue;
@@ -203,21 +203,21 @@ implementation
 
 { JsonStringFactory ------------------------------------------------------------------------------ }
 
-  class function JsonStringFactory.New: IJsonValue;
+  class function JsonStringFactory.New: IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsString := '';
   end;
 
 
-  class function JsonStringFactory.AsString(const aValue: UnicodeString): IJsonValue;
+  class function JsonStringFactory.AsString(const aValue: UnicodeString): IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsString := aValue;
   end;
 
 
-  class function JsonStringFactory.AsUtf8(const aValue: Utf8String): IJsonValue;
+  class function JsonStringFactory.AsUtf8(const aValue: Utf8String): IJsonMutableValue;
   begin
     result := TJsonValue.Create;
     result.AsUtf8 := aValue;

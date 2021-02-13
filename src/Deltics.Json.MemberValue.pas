@@ -16,9 +16,9 @@ interface
 
 
   type
-    TMemberValueFn = function: IJsonValue of object;
+    TMemberValueFn = function: IJsonMutableValue of object;
 
-    TJsonMemberValue = class(TComInterfacedObject, IJsonValue)
+    TJsonMemberValue = class(TComInterfacedObject, IJsonMemberValue)
     // IJsonValue
     protected
       function get_AsBoolean: Boolean;
@@ -51,18 +51,24 @@ interface
       procedure set_AsString(const aValue: UnicodeString);
       procedure set_AsUtf8(const aValue: Utf8String);
 
+    // IJsonMemberValue
+    protected
+      function OrDefault(const aValue: IJsonValue): IJsonValue;
+
     private
       fObject: IJsonObject;
       fMember: IJsonMember;
+      fMemberExists: Boolean;
       fMemberName: UnicodeString;
       fMemberValueFn: TMemberValueFn;
-      fValue: IJsonValue;
+      fValue: IJsonMutableValue;
       property MemberValue: TMemberValueFn read fMemberValueFn;
 
-      function InitMemberValue: IJsonValue;
-      function YieldMemberValue: IJsonValue;
+      function _InitMemberValue: IJsonMutableValue;
+      function _YieldMemberValue: IJsonMutableValue;
     public
       constructor Create(const aObject: IJsonObject; const aMemberName: UnicodeString);
+      property MemberExists: Boolean read fMemberExists;
     end;
 
 
@@ -71,6 +77,7 @@ interface
 implementation
 
   uses
+    Deltics.Json,
     Deltics.Json.Object_;
 
 
@@ -81,17 +88,18 @@ implementation
   begin
     inherited Create;
 
-    fObject     := aObject;
-    fMemberName := aMemberName;
+    fObject       := aObject;
+    fMemberName   := aMemberName;
+    fMemberExists := aObject.Contains(aMemberName, fMember);
 
-    if aObject.Contains(aMemberName, fMember) then
+    if MemberExists then
     begin
-      fMemberValueFn  := YieldMemberValue;
+      fMemberValueFn  := _YieldMemberValue;
       fValue          := fMember.Value;
     end
     else
     begin
-      fMemberValueFn  := InitMemberValue;
+      fMemberValueFn  := _InitMemberValue;
       fValue          := TJsonValue.Create;
     end;
   end;
@@ -193,16 +201,26 @@ implementation
   end;
 
 
-  function TJsonMemberValue.InitMemberValue: IJsonValue;
+  function TJsonMemberValue.OrDefault(const aValue: IJsonValue): IJsonValue;
+  begin
+    if MemberExists then
+      result := fValue
+    else
+      result := aValue;
+  end;
+
+
+  function TJsonMemberValue._InitMemberValue: IJsonMutableValue;
   begin
     TJsonObject((fObject as IInterfacedObject).AsObject).Add(fMemberName, fValue);
 
-    fMemberValueFn  := YieldMemberValue;
+    fMemberExists   := TRUE;
+    fMemberValueFn  := _YieldMemberValue;
     result          := fValue;
   end;
 
 
-  function TJsonMemberValue.YieldMemberValue: IJsonValue;
+  function TJsonMemberValue._YieldMemberValue: IJsonMutableValue;
   begin
     result := fValue;
   end;

@@ -17,12 +17,13 @@ interface
     TJsonArray = class(TJsonCollection, IJsonArray)
     // IJsonArray
     protected
-      function get_Item(const aIndex: Integer): IJsonValue;
+      function get_First: IJsonMutableValue;
+      function get_Item(const aIndex: Integer): IJsonMutableValue;
+      function get_Last: IJsonMutableValue;
     public
       function Add(const aValue: IJsonValue): Integer;
-      procedure Delete(const aIndex: Integer); overload;
-      procedure Delete(const aValue: IJsonValue); overload;
-      property Items[const aIndex: Integer]: IJsonValue read get_Item; default;
+      procedure Delete(const aIndex: Integer);
+      procedure Remove(const aValue: IJsonValue);
     end;
 
 
@@ -54,16 +55,38 @@ implementation
   end;
 
 
-  procedure TJsonArray.Delete(const aValue: IJsonValue);
+  procedure TJsonArray.Remove(const aValue: IJsonValue);
+  var
+    i: Integer;
+    item: IUnknown;
   begin
-    // TODO
+    for i := 0 to Pred(Count) do
+      if item = (Items[i] as IUnknown) then
+      begin
+        Delete(i);
+        EXIT;
+      end;
   end;
 
 
-  function TJsonArray.get_Item(const aIndex: Integer): IJsonValue;
+  function TJsonArray.get_First: IJsonMutableValue;
   begin
-    result := inherited Items[aIndex] as IJsonValue;
+    result := Items[0] as IJsonMutableValue;
   end;
+
+
+  function TJsonArray.get_Item(const aIndex: Integer): IJsonMutableValue;
+  begin
+    result := inherited Items[aIndex] as IJsonMutableValue;
+  end;
+
+
+  function TJsonArray.get_Last: IJsonMutableValue;
+  begin
+    result := Items[Count - 1] as IJsonMutableValue;
+  end;
+
+
 
 
 

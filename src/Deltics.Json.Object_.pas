@@ -18,7 +18,7 @@ interface
     // IJsonObject
     protected
       function get_Item(const aIndex: Integer): IJsonMember;
-      function get_Value(const aName: UnicodeString): IJsonValue; overload;
+      function get_Value(const aName: UnicodeString): IJsonMemberValue; overload;
     public
       function Add(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
       function Contains(const aName: UnicodeString): Boolean; overload;
@@ -81,7 +81,7 @@ implementation
   end;
 
 
-  function TJsonObject.get_Value(const aName: UnicodeString): IJsonValue;
+  function TJsonObject.get_Value(const aName: UnicodeString): IJsonMemberValue;
   begin
     result := TJsonMemberValue.Create(self as IJsonObject, aName)
   end;
@@ -92,7 +92,7 @@ implementation
   begin
     if Contains(aName, result) then
     begin
-      result.Value := aValue;
+      result.Value := aValue as IJsonMutableValue;
       EXIT;
     end;
 

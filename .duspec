@@ -20,7 +20,7 @@
     "deltics.datetime:1.0.0",
     "deltics.io.text:1.0.2",
     "deltics.interfacedobjects:1.2.0",
-    "deltics.strings:1.3.2"
+    "deltics.strings:1.4.0-beta.9"
   ],
   "source":{
       "files":[

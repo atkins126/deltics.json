@@ -23,11 +23,17 @@ uses
   Deltics.Json.Utils in '..\src\Deltics.Json.Utils.pas',
   Test.BuildingJson in 'Test.BuildingJson.pas',
   Test.NumberConversions in 'Test.NumberConversions.pas',
-  Test.JsonReader in 'Test.JsonReader.pas';
+  Test.JsonReader in 'Test.JsonReader.pas',
+  Test.JsonStringEncoding in 'Test.JsonStringEncoding.pas',
+  Test.JsonStringDecoding in 'Test.JsonStringDecoding.pas',
+  Test.DefaultValues in 'Test.DefaultValues.pas';
 
 begin
   TestRun.Test(BuildingJson);
+  TestRun.Test(DefaultValues);
   TestRun.Test(NumberConversions);
+  TestRun.Test(JsonStringEncoding);
+  TestRun.Test(JsonStringDecoding);
   TestRun.Test(JsonReader);
 end.
 

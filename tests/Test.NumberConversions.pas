@@ -28,7 +28,7 @@ implementation
 
 
   var
-    sut: IJsonValue;
+    sut: IJsonMutableValue;
 
 
 { NumberConversions }

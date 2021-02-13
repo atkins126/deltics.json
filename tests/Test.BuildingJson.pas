@@ -37,7 +37,7 @@ implementation
     sut.Add('foo', JsonString('bar'));
 
     Test('sut.Count').Assert(sut.Count).Equals(1);
-    Test('sut[''foo'']').AssertUtf8(sut['foo'].Value).Equals('bar');
+    Test('sut[''foo'']').Assert(sut['foo'].AsString).Equals('bar');
   end;
 
 
@@ -49,7 +49,7 @@ implementation
     sut.Add('foo', JsonString('bar'));
 
     Test('sut.Count').Assert(sut.Count).Equals(1);
-    Test('sut[''foo'']').AssertUtf8(sut['foo'].Value).Equals('bar');
+    Test('sut[''foo'']').Assert(sut['foo'].AsString).Equals('bar');
   end;
 
 

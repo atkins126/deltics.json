@@ -15,6 +15,7 @@ interface
     JsonArrayFactory = class
     public
       class function New: IJsonArray;
+      class function FromFile(const aFilename: String): IJsonArray;
       class function FromString(const aString: UnicodeString): IJsonArray;
     end;
     JsonArray = class of JsonArrayFactory;
@@ -51,6 +52,7 @@ interface
     JsonObjectFactory = class
     public
       class function New: IJsonObject; reintroduce;
+      class function FromFile(const aFilename: String): IJsonObject;
       class function FromString(const aString: UnicodeString): IJsonObject;
     end;
     JsonObject = class of JsonObjectFactory;
@@ -86,6 +88,12 @@ implementation
   class function JsonArrayFactory.New: IJsonArray;
   begin
     result := TJsonArray.Create;
+  end;
+
+
+  class function JsonArrayFactory.FromFile(const aFilename: String): IJsonArray;
+  begin
+    result := Json.FromFile(aFilename) as IJsonArray;
   end;
 
 
@@ -189,6 +197,12 @@ implementation
   class function JsonObjectFactory.New: IJsonObject;
   begin
     result := TJsonObject.Create;
+  end;
+
+
+  class function JsonObjectFactory.FromFile(const aFilename: String): IJsonObject;
+  begin
+    result := Json.FromFile(aFilename) as IJsonObject;
   end;
 
 

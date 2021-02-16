@@ -119,6 +119,7 @@ interface
       function Add(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
       function Contains(const aName: UnicodeString): Boolean; overload;
       function Contains(const aName: UnicodeString; var aMember: IJsonMember): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: IJsonValue): Boolean; overload;
 
       property Items[const aIndex: Integer]: IJsonMember read get_Item;
       property Value[const aName: UnicodeString]: IJsonMemberValue read get_Value; default;

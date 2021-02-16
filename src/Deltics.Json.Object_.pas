@@ -23,6 +23,7 @@ interface
       function Add(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
       function Contains(const aName: UnicodeString): Boolean; overload;
       function Contains(const aName: UnicodeString; var aMember: IJsonMember): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: IJsonValue): Boolean; overload;
 //      property Value[const aName: UnicodeString]: IJsonValue read get_Value; default;
 //      property Items[const aIndex: Integer]: IJsonMember read get_Item;
 
@@ -56,7 +57,7 @@ implementation
 
   function TJsonObject.Contains(const aName: UnicodeString): Boolean;
   var
-    notUsed: IJsonMember;
+    notUsed: IJsonValue;
   begin
     result := Contains(aName, notUsed);
   end;
@@ -72,12 +73,25 @@ implementation
     for i := 0 to Pred(Count) do
     begin
       aMember := Items[i] as IJsonMember;
-      if aMember.Name = aName then
+      if (aMember.Name = aName) then
         EXIT;
     end;
 
     aMember := NIL;
     result  := FALSE;
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString;
+                                var   aValue: IJsonValue): Boolean;
+  var
+    member: IJsonMember;
+  begin
+    aValue  := NIL;
+    result  := Contains(aName, member);
+
+    if result then
+      aValue := member.Value;
   end;
 
 

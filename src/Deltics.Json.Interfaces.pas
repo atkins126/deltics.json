@@ -118,8 +118,18 @@ interface
 
       function Add(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
       function Contains(const aName: UnicodeString): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: IJsonArray): Boolean; overload;
       function Contains(const aName: UnicodeString; var aMember: IJsonMember): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: IJsonObject): Boolean; overload;
       function Contains(const aName: UnicodeString; var aValue: IJsonValue): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: Boolean): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: Integer): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: Double): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: AnsiString): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: UnicodeString): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: Utf8String): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: WideString): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: TUnicodeStringArray): Boolean; overload;
 
       property Items[const aIndex: Integer]: IJsonMember read get_Item;
       property Value[const aName: UnicodeString]: IJsonMemberValue read get_Value; default;
@@ -146,6 +156,7 @@ interface
 
     IJsonArray = interface(IJsonCollection)
     ['{9F5563F5-D0BB-4DDA-9300-FFC7FC941C3B}']
+      function get_AsStringArray: TUnicodeStringArray;
       function get_First: IJsonMutableValue;
       function get_Item(const aIndex: Integer): IJsonMutableValue;
       function get_Last: IJsonMutableValue;
@@ -154,6 +165,7 @@ interface
       procedure Delete(const aIndex: Integer);
       procedure Remove(const aValue: IJsonValue);
 
+      property AsStringArray: TUnicodeStringArray read get_AsStringArray;
       property First: IJsonMutableValue read get_First;
       property Items[const aIndex: Integer]: IJsonMutableValue read get_Item; default;
       property Last: IJsonMutableValue read get_Last;

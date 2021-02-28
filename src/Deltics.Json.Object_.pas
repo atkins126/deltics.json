@@ -22,8 +22,18 @@ interface
     public
       function Add(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
       function Contains(const aName: UnicodeString): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: IJsonArray): Boolean; overload;
       function Contains(const aName: UnicodeString; var aMember: IJsonMember): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: IJsonObject): Boolean; overload;
       function Contains(const aName: UnicodeString; var aValue: IJsonValue): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: Boolean): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: Integer): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: Double): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: AnsiString): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: UnicodeString): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: Utf8String): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: WideString): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: TUnicodeStringArray): Boolean; overload;
 //      property Value[const aName: UnicodeString]: IJsonValue read get_Value; default;
 //      property Items[const aIndex: Integer]: IJsonMember read get_Item;
 
@@ -120,6 +130,108 @@ implementation
   begin
     result := inherited Items[aIndex] as IJsonMember;
   end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: AnsiString): Boolean;
+  var
+    v: IJsonValue;
+  begin
+    result := Contains(aName, v);
+    if result then
+      aValue := Ansi.FromWide(v.AsString);
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: UnicodeString): Boolean;
+  var
+    v: IJsonValue;
+  begin
+    result := Contains(aName, v);
+    if result then
+      aValue := v.AsString;
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: Utf8String): Boolean;
+  var
+    v: IJsonValue;
+  begin
+    result := Contains(aName, v);
+    if result then
+      aValue := v.AsUtf8;
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: WideString): Boolean;
+  var
+    v: IJsonValue;
+  begin
+    result := Contains(aName, v);
+    if result then
+      aValue := v.AsString;
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: Boolean): Boolean;
+  var
+    v: IJsonValue;
+  begin
+    result := Contains(aName, v);
+    if result then
+      aValue := v.AsBoolean;
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: IJsonObject): Boolean;
+  var
+    v: IJsonValue;
+  begin
+    result := Contains(aName, v);
+    if result then
+      aValue := v as IJsonObject;
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: IJsonArray): Boolean;
+  var
+    v: IJsonValue;
+  begin
+    result := Contains(aName, v);
+    if result then
+      aValue := v as IJsonArray;
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: TUnicodeStringArray): Boolean;
+  var
+    a: IJsonArray;
+  begin
+    result := Contains(aName, a);
+    if result then
+      aValue := a.AsStringArray;
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: Double): Boolean;
+  var
+    v: IJsonValue;
+  begin
+    result := Contains(aName, v);
+    if result then
+      aValue := v.AsDouble;
+  end;
+
+
+  function TJsonObject.Contains(const aName: UnicodeString; var aValue: Integer): Boolean;
+  var
+    v: IJsonValue;
+  begin
+    result := Contains(aName, v);
+    if result then
+      aValue := v.AsInteger;
+  end;
+
+
 
 
 

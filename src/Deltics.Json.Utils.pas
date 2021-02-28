@@ -44,7 +44,7 @@ implementation
 
   uses
     Deltics.io.Text,
-    Deltics.Pointers,
+    Deltics.Unicode,
     Deltics.Json.Exceptions,
     Deltics.Json.Reader;
 
@@ -320,16 +320,6 @@ implementation
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   class function Json.EncodeString(const aString: UnicodeString): UnicodeString;
-
-    function EscapeUnicode(const aChar: WideChar): UnicodeString;
-    var
-      buf: array[0..3] of WideChar;
-    begin
-      Classes.BinToHex(@aChar, PWideChar(@buf), 2);
-
-      result := '\u' + buf[2] + buf[3] + buf[0] + buf[1];
-    end;
-
   var
     i: Integer;
     c: WideChar;
@@ -350,7 +340,7 @@ implementation
       else
         // TODO: Escape encoding of Unicode should be optional for anything other than non-printables
         if (Word(c) < 32) or (Word(c) > 127) then
-          result := result + EscapeUnicode(c)
+          result := result + Unicode.Json(c)
         else
           result := result + c;
       end;

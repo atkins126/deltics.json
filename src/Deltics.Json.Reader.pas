@@ -94,7 +94,7 @@ implementation
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   function TJsonReader.ReadArray: IJsonArray;
   var
-    value: IJsonMutableValue;
+    value: IJsonValue;
   begin
     if ReadRealChar <> '[' then
       raise EJsonStreamError.Create('Expected ''[''');

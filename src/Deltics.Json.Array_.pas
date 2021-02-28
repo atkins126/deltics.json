@@ -17,6 +17,7 @@ interface
     TJsonArray = class(TJsonCollection, IJsonArray)
     // IJsonArray
     protected
+      function get_AsStringArray: TUnicodeStringArray;
       function get_First: IJsonMutableValue;
       function get_Item(const aIndex: Integer): IJsonMutableValue;
       function get_Last: IJsonMutableValue;
@@ -24,6 +25,7 @@ interface
       function Add(const aValue: IJsonValue): Integer;
       procedure Delete(const aIndex: Integer);
       procedure Remove(const aValue: IJsonValue);
+      property Items[const aIndex: Integer]: IJsonMutableValue read get_Item;
     end;
 
 
@@ -66,6 +68,16 @@ implementation
         Delete(i);
         EXIT;
       end;
+  end;
+
+
+  function TJsonArray.get_AsStringArray: TUnicodeStringArray;
+  var
+    i: Integer;
+  begin
+    SetLength(result, Count);
+    for i := 0 to Pred(Count) do
+      result[i] := Items[i].AsString;
   end;
 
 

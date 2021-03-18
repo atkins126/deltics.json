@@ -8,7 +8,7 @@ interface
 
   uses
     Deltics.InterfacedObjects,
-    Deltics.io.Text,
+    Deltics.IO.Text,
     Deltics.Strings,
     Deltics.Json.Array_,
     Deltics.Json.Object_,

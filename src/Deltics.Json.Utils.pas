@@ -50,7 +50,7 @@ implementation
 
   uses
     Deltics.Hex2Bin,
-    Deltics.io.Text,
+    Deltics.IO.Text,
     Deltics.Strings,
     Deltics.Strings.Encoding,
     Deltics.Unicode,

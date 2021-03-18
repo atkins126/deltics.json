@@ -39,6 +39,7 @@ begin
   TestRun.Test(JsonObjects);
   TestRun.Test(JsonStringEncoding);
   TestRun.Test(JsonStringDecoding);
+  TestRun.Test(JsonReader);
   TestRun.Test(JsonFormatter);
 end.
 

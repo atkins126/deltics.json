@@ -60,7 +60,7 @@ interface
       procedure SetNull;
       procedure SetValue(const aValueType: TValueType; const aValue: AnsiString); overload;
       procedure SetValue(const aValueType: TValueType; const aValue: UnicodeString); overload;
-      procedure SetValue(const aValueType: TValueType; const aValue: Utf8String); overload;
+      procedure SetValueUtf8(const aValueType: TValueType; const aValue: Utf8String);
     public
       constructor Create;
       property AsString: UnicodeString read fValue write set_AsString;
@@ -380,19 +380,10 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJsonValue.SetValue(const aValueType: TValueType; const aValue: AnsiString);
+  procedure TJsonValue.SetValue(const aValueType: TValueType;
+                                const aValue: AnsiString);
   begin
     SetValue(aValueType, Wide.FromAnsi(aValue));
-  end;
-
-
-  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  procedure TJsonValue.SetValue(const aValueType: TValueType;
-                                const aValue: Utf8String);
-  begin
-    fValueType  := aValueType;
-    fValue      := Wide.FromUtf8(aValue);
-    fIsNull     := FALSE;
   end;
 
 
@@ -406,6 +397,14 @@ implementation
   end;
 
 
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  procedure TJsonValue.SetValueUtf8(const aValueType: TValueType;
+                                    const aValue: Utf8String);
+  begin
+    fValueType  := aValueType;
+    fValue      := Wide.FromUtf8(aValue);
+    fIsNull     := FALSE;
+  end;
 
 
 //  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
@@ -528,7 +527,7 @@ implementation
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.set_AsUtf8(const aValue: Utf8String);
   begin
-    SetValue(jsString, aValue);
+    SetValueUtf8(jsString, aValue);
   end;
 
 

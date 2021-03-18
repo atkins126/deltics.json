@@ -86,7 +86,7 @@ implementation
     sut: Double;
   begin
     Test('Contains[''aFloat'']').Assert(o.Contains('aFloat', sut)).IsTrue;
-    Test('sut').Assert(sut).Equals(4.2);
+    Test('sut').AssertDouble(sut).Equals(4.2);
   end;
 
 

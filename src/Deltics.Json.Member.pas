@@ -8,8 +8,8 @@ interface
 
   uses
     Deltics.InterfacedObjects,
-    Deltics.Strings,
-    Deltics.Json.Interfaces;
+    Deltics.Unicode,
+    Deltics.Json.Types;
 
 
   type

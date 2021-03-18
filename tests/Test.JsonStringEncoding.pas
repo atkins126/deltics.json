@@ -110,7 +110,7 @@ implementation
   begin
     s := Json.EncodeString('©');
 
-    Test('s').Assert(s).Equals('"\u00A9"');
+    Test('s').Assert(s).Equals('"\u00a9"');
   end;
 
 
@@ -120,7 +120,7 @@ implementation
   begin
     s := Json.EncodeString(#11);
 
-    Test('s').Assert(s).Equals('"\u000B"');
+    Test('s').Assert(s).Equals('"\u000b"');
   end;
 
 
@@ -151,7 +151,7 @@ implementation
 
     s := Json.EncodeString(src);
 
-    Test('s').Assert(s).Equals('"\uD834\uDD1E"');
+    Test('s').Assert(s).Equals('"\ud834\udd1e"');
   end;
 
 

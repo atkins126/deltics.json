@@ -8,16 +8,16 @@ interface
 
   uses
     Deltics.InterfacedObjects,
-    Deltics.Strings,
-    Deltics.Json.Interfaces,
-    Deltics.Json.Collection;
+    Deltics.Unicode,
+    Deltics.Json.Collection,
+    Deltics.Json.Types;
 
 
   type
     TJsonArray = class(TJsonCollection, IJsonArray)
     // IJsonArray
     protected
-      function get_AsStringArray: TUnicodeStringArray;
+      function get_AsStringArray: UnicodeStringArray;
       function get_First: IJsonMutableValue;
       function get_Item(const aIndex: Integer): IJsonMutableValue;
       function get_Last: IJsonMutableValue;
@@ -71,7 +71,7 @@ implementation
   end;
 
 
-  function TJsonArray.get_AsStringArray: TUnicodeStringArray;
+  function TJsonArray.get_AsStringArray: UnicodeStringArray;
   var
     i: Integer;
   begin

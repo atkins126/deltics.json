@@ -10,8 +10,8 @@ interface
     TypInfo,
     Deltics.Datetime,
     Deltics.InterfacedObjects,
-    Deltics.Strings,
-    Deltics.Json.Interfaces,
+    Deltics.Unicode,
+    Deltics.Json.Types,
     Deltics.Json.Value;
 
 

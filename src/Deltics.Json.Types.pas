@@ -1,18 +1,20 @@
 
 {$i deltics.json.inc}
 
-  unit Deltics.Json.Interfaces;
+  unit Deltics.Json.Types;
 
 
 interface
 
   uses
+    Classes,
     TypInfo,
     Deltics.Datetime,
-    Deltics.Strings;
+    Deltics.Unicode;
 
 
   type
+    TJsonFormat = (jfStandard, jfCompact, jfConfig);
     TNumberType = (ntDouble, ntInteger);
     TValueType = (jsObject, jsArray, jsString, jsNumber, jsBoolean, jsNull);
 
@@ -105,6 +107,8 @@ interface
       function get_IsEmpty: Boolean;
 
       procedure Clear;
+      procedure SaveAs(const aFilename: String; const aFormat: TJsonFormat = jfStandard);
+      procedure WriteTo(const aStream: TStream; const aFormat: TJsonFormat = jfStandard);
 
       property Count: Integer read get_Count;
       property IsEmpty: Boolean read get_IsEmpty;
@@ -116,7 +120,12 @@ interface
       function get_Item(const aIndex: Integer): IJsonMember;
       function get_Value(const aName: UnicodeString): IJsonMemberValue;
 
-      function Add(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember;
+      function Add(const aName: UnicodeString; const aValue: IJsonArray): IJsonArray; overload;
+      function Add(const aName: UnicodeString; const aValue: IJsonObject): IJsonObject; overload;
+      function Add(const aName: UnicodeString; const aValue: IJsonValue): IJsonMember; overload;
+      function AddAfter(const aPredecessor: UnicodeString; const aName: UnicodeString; const aValue: IJsonArray): IJsonArray; overload;
+      function AddAfter(const aPredecessor: UnicodeString; const aName: UnicodeString; const aValue: IJsonObject): IJsonObject; overload;
+      function AddAfter(const aPredecessor: UnicodeString; const aName: UnicodeString; const aValue: IJsonValue): IJsonMember; overload;
       function Contains(const aName: UnicodeString): Boolean; overload;
       function Contains(const aName: UnicodeString; var aValue: IJsonArray): Boolean; overload;
       function Contains(const aName: UnicodeString; var aMember: IJsonMember): Boolean; overload;
@@ -125,11 +134,8 @@ interface
       function Contains(const aName: UnicodeString; var aValue: Boolean): Boolean; overload;
       function Contains(const aName: UnicodeString; var aValue: Integer): Boolean; overload;
       function Contains(const aName: UnicodeString; var aValue: Double): Boolean; overload;
-      function Contains(const aName: UnicodeString; var aValue: AnsiString): Boolean; overload;
       function Contains(const aName: UnicodeString; var aValue: UnicodeString): Boolean; overload;
-      function Contains(const aName: UnicodeString; var aValue: Utf8String): Boolean; overload;
-      function Contains(const aName: UnicodeString; var aValue: WideString): Boolean; overload;
-      function Contains(const aName: UnicodeString; var aValue: TUnicodeStringArray): Boolean; overload;
+      function Contains(const aName: UnicodeString; var aValue: UnicodeStringArray): Boolean; overload;
 
       property Items[const aIndex: Integer]: IJsonMember read get_Item;
       property Value[const aName: UnicodeString]: IJsonMemberValue read get_Value; default;
@@ -156,7 +162,7 @@ interface
 
     IJsonArray = interface(IJsonCollection)
     ['{9F5563F5-D0BB-4DDA-9300-FFC7FC941C3B}']
-      function get_AsStringArray: TUnicodeStringArray;
+      function get_AsStringArray: UnicodeStringArray;
       function get_First: IJsonMutableValue;
       function get_Item(const aIndex: Integer): IJsonMutableValue;
       function get_Last: IJsonMutableValue;
@@ -165,7 +171,8 @@ interface
       procedure Delete(const aIndex: Integer);
       procedure Remove(const aValue: IJsonValue);
 
-      property AsStringArray: TUnicodeStringArray read get_AsStringArray;
+
+      property AsStringArray: UnicodeStringArray read get_AsStringArray;
       property First: IJsonMutableValue read get_First;
       property Items[const aIndex: Integer]: IJsonMutableValue read get_Item; default;
       property Last: IJsonMutableValue read get_Last;

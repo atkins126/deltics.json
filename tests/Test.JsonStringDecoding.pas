@@ -116,12 +116,14 @@ implementation
 
 
   procedure JsonStringDecoding.OtherControlCharactersDecodeWithEscapedUnicode;
+  const
+    EXPECTED: UnicodeString = #$000B;
   var
     s: UnicodeString;
   begin
     s := Json.DecodeString('\u000B');
 
-    Test('s').Assert(s).Equals(#11);
+    Test('DecodeString(\u000B)').Assert(s).Equals(EXPECTED);
   end;
 
 

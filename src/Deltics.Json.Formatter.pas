@@ -51,16 +51,13 @@ interface
     Deltics.Strings,
     Deltics.Json.Exceptions,
     Deltics.Json.Factories,
-    Deltics.Json.Interfaces,
+    Deltics.Json.Types,
     Deltics.Json.Utils;
 
 
   type
-    TJsonFormat = (jfStandard, jfCompact, jfConfig);
-
-
     JsonFormatter = class
-      class function Format(const aValue: IJsonMutableValue; const aFormat: TJsonFormat): Utf8String;
+      class function Format(const aValue: IJsonValue; const aFormat: TJsonFormat): Utf8String;
     end;
 
 
@@ -69,10 +66,17 @@ interface
 
 implementation
 
+  uses
+    Deltics.StringBuilders;
+
+
+
 { JsonFormatter }
 
-  class function JsonFormatter.Format(const aValue: IJsonMutableValue;
+  class function JsonFormatter.Format(const aValue: IJsonValue;
                                       const aFormat: TJsonFormat): Utf8String;
+  var
+    builder: IUtf8StringBuilder;
 
     function ObjectToString(const aObject: IJsonObject;
                             const aIndent: Integer): Utf8String; forward;
@@ -85,13 +89,14 @@ implementation
     begin
       if (aArray.Count = 0) then
       begin
-        result := '[]';
+        builder.Add('[]');
         EXIT;
       end;
 
-      result := '[';
+      builder.Add('[');
+
       if aFormat in [jfStandard, jfConfig] then
-        result := result + #13#10;
+        builder.Add(#13#10);
 
       if aArray.Count > 0 then
       begin
@@ -100,49 +105,59 @@ implementation
           item := aArray.Items[i];
 
           if aFormat in [jfStandard, jfConfig] then
-            result := result + Utf8.StringOf(' ', aIndent);
+            builder.Add(' ', aIndent);
 
           if NOT item.IsNull then
             case item.ValueType of
-              jsString  : result := result + JsonString.EncodeUtf8(item.AsString);
+              jsString  : builder.Add(JsonString.EncodeUtf8(item.AsString));
 
               jsArray   : begin
                             if aFormat in [jfStandard, jfConfig] then
-                              result := result + '  ';
-                            result := result + ArrayToString(item as IJsonArray, aIndent + 2);
+                              builder.Add('  ');
+
+                            ArrayToString(item as IJsonArray, aIndent + 2);
                           end;
 
               jsObject  : begin
                             if aFormat in [jfStandard, jfConfig] then
-                              result := result + '  ';
-                            result := result + ObjectToString(item as IJsonObject, aIndent + 2);
+                              builder.Add('  ');
+
+                            ObjectToString(item as IJsonObject, aIndent + 2);
                           end;
             else
-              result := result + item.AsUtf8;
+              builder.Add(item.AsUtf8);
             end
           else
           begin
             if aFormat in [jfStandard, jfConfig] then
-              result := result + '  ';
-            result := result + 'null';
+              builder.Add('  ');
+
+            builder.Add('null');
           end;
 
-          result := result + ',';
+          builder.Add(',');
 
           if aFormat in [jfStandard, jfConfig] then
-            result := result + #13#10;
+            builder.Add(#13#10);
         end;
 
+        // At this point we have at least an excess ',' and if we are formatting
+        //  in standard (pretty) or config mode, then we also have an excess
+        //  CRLF, all of which need to be removed.
+
         if aFormat in [jfStandard, jfConfig] then
-          SetLength(result, Length(result) - 3)
+          builder.Remove(3)
         else
-          SetLength(result, Length(result) - 1)
+          builder.Remove(1);
       end;
 
       if aFormat in [jfStandard, jfConfig] then
-        result := result + #13#10 + Utf8.FromString(StringOfChar(' ', aIndent - 2));
+      begin
+        builder.Add(#13#10);
+        builder.Add(' ', aIndent - 2);
+      end;
 
-      result := result + ']';
+      builder.Add(']');
     end;
 
     function ObjectToString(const aObject: IJsonObject;
@@ -154,68 +169,78 @@ implementation
     begin
       if (aObject.Count = 0) then
       begin
-        result := '{}';
+        builder.Add('{}');
         EXIT;
       end;
 
-      result := '{';
+      builder.Add('{');
+
       if aFormat in [jfStandard, jfConfig] then
-        result := result + #13#10;
+        builder.Add(#13#10);
 
       if aObject.Count > 0 then
       begin
         for i := 0 to Pred(aObject.Count) do
         begin
-          member := aObject.Items[i];
+          member  := aObject.Items[i];
+          value   := member.Value;
 
           if aFormat in [jfStandard, jfConfig] then
-            result := result + Utf8.FromString(StringOfChar(' ', aIndent + 2));
+            builder.Add(' ', aIndent + 2);
 
-          if (aFormat = jfConfig) then
-            result := result + Utf8.FromString(member.Name)
-          else
-            result := result + JsonString.EncodeUtf8(member.Name);
+          builder.Add(JsonString.EncodeUtf8(member.Name, aFormat <> jfConfig));
 
-          result := result + ':';
+          builder.Add(':');
           if (aFormat = jfConfig) then
-            result := result + ' ';
+            builder.Add(' ');
 
           if value.IsNull then
-            result := result + 'null'
+            builder.Add('null')
           else
             case value.ValueType of
-              jsString  : result := result + JsonString.EncodeUtf8(value.AsString);
-              jsArray   : result := result + ArrayToString(value as IJsonArray, aIndent + 4);
-              jsObject  : result := result + ObjectToString(value as IJsonObject, aIndent + 4);
+              jsString  : builder.Add(JsonString.EncodeUtf8(value.AsString, TRUE));
+              jsArray   : ArrayToString(value as IJsonArray, aIndent + 4);
+              jsObject  : ObjectToString(value as IJsonObject, aIndent + 4);
             else
-              result := result + value.AsUtf8;
+              builder.Add(value.AsUtf8);
             end;
 
-          result := result + ',';
+          builder.Add(',');
           if aFormat in [jfStandard, jfConfig] then
-            result := result + #13#10;
+            builder.Add(#13#10);
         end;
 
+        // At this point we have at least an excess ',' and if we are formatting
+        //  in standard (pretty) or config mode, then we also have an excess
+        //  CRLF, all of which need to be removed.
+
         if aFormat in [jfStandard, jfConfig] then
-          SetLength(result, Length(result) - 3)
+          builder.Remove(3)
         else
-          SetLength(result, Length(result) - 1);
+          builder.Remove(1);
       end;
 
       if aFormat in [jfStandard, jfConfig] then
-        result := result + #13#10 + Utf8.FromString(StringOfChar(' ', aIndent));
+      begin
+        builder.Add(#13#10);
+        builder.Add(' ', aIndent);
+      end;
 
-      result := result + '}';
+      builder.Add('}');
     end;
 
   begin
+    builder := TUtf8StringBuilder.Create;
+
     case aValue.ValueType of
-      jsArray   : result := ArrayToString(aValue as IJsonArray, 0);
-      jsObject  : result := ObjectToString(aValue as IJsonObject, 0);
-      jsString  : result := JsonString.EncodeUtf8(aValue.AsString);
+      jsArray   : ArrayToString(aValue as IJsonArray, 0);
+      jsObject  : ObjectToString(aValue as IJsonObject, 0);
+      jsString  : builder.Add(JsonString.EncodeUtf8(aValue.AsString, TRUE));
     else
-      result := aValue.AsUtf8;
+      builder.Add(aValue.AsUtf8);
     end;
+
+    result := builder.AsString;
   end;
 
 

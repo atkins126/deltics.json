@@ -11,8 +11,8 @@ interface
     Deltics.io.Text,
     Deltics.Strings,
     Deltics.Json.Array_,
-    Deltics.Json.Interfaces,
     Deltics.Json.Object_,
+    Deltics.Json.Types,
     Deltics.Json.Value;
 
 
@@ -21,8 +21,8 @@ interface
     private
       fSource: IUnicodeReader;
       function EOF: Boolean;
-      function NextChar: WideChar;
-      function NextRealChar: WideChar;
+      function PeekChar: WideChar;
+      function PeekRealChar: WideChar;
       function ReadChar: WideChar;
       function ReadRealChar: WideChar; overload;
       function ReadName: UnicodeString;
@@ -39,7 +39,8 @@ implementation
 
   uses
     SysUtils,
-    Deltics.Pointers,
+    Deltics.Hex2Bin,
+    Deltics.StringParsers,
     Deltics.Json.Exceptions,
     Deltics.Json.Factories;
 
@@ -63,14 +64,14 @@ implementation
   end;
 
 
-  function TJsonReader.NextChar: WideChar;
+  function TJsonReader.PeekChar: WideChar;
   begin
     result := fSource.PeekChar;
    end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function TJsonReader.NextRealChar: WideChar;
+  function TJsonReader.PeekRealChar: WideChar;
   begin
     result := fSource.PeekCharSkippingWhitespace;
   end;
@@ -101,7 +102,7 @@ implementation
 
     result := TJsonArray.Create;
 
-    if (NextRealChar = ']') then
+    if (PeekRealChar = ']') then
     begin
       // It's an array alright, but it's empty so just return
       //  the new, empty array, reading past the  ']' that closes the array
@@ -117,7 +118,7 @@ implementation
       value := ReadValue;
       result.Add(value);
 
-      case NextRealChar of
+      case PeekRealChar of
         ']' : begin
                 ReadRealChar;
                 EXIT;
@@ -125,7 +126,7 @@ implementation
 
         ',' : ReadRealChar;
       else
-        raise EJsonStreamError.Create('Unexpected character ''' + NextRealChar + ''' in array');
+        raise EJsonStreamError.Create('Unexpected character ''' + PeekRealChar + ''' in array');
       end;
     end;
 
@@ -145,7 +146,7 @@ implementation
 
     result := TJsonObject.Create;
 
-    if (NextRealChar = '}') then
+    if (PeekRealChar = '}') then
     begin
       ReadRealChar; // Skip the '}'
       EXIT;
@@ -153,7 +154,7 @@ implementation
 
     while NOT EOF do
     begin
-      if NextRealChar = '"' then
+      if PeekRealChar = '"' then
         name := ReadString
       else
         name := ReadName;
@@ -171,7 +172,7 @@ implementation
 
       // Test the next char for , (another name/value pair to follow) or } (end of object)
 
-      case NextRealChar of
+      case PeekRealChar of
 
         '}' : begin
                 ReadRealChar;
@@ -181,7 +182,7 @@ implementation
         ',' : ReadRealChar;
 
       else
-        raise EJsonStreamError.Create('Unexpected character ''' + NextRealChar + ''' in object');
+        raise EJsonStreamError.Create('Unexpected character ''' + PeekRealChar + ''' in object');
       end;
     end;
 
@@ -220,11 +221,12 @@ implementation
       if EOF then
         raise EJsonStreamError.Create('UnicodeString not terminated');
 
-      c := NextRealChar;
+      c := PeekRealChar;
 
-      if ANSIChar(c) = ':' then
+      if (Ord(c) < 128) and (AnsiChar(c) = ':') then
       begin
-        if WIDE.EndsWith(result, '.') or WIDE.EndsWith(result, '-') then
+        c := result[Length(result)];
+        if (c = '.') or (c = '-') then
           raise EJsonStreamError.Create('Invalid name')
         else
           EXIT;
@@ -244,27 +246,28 @@ implementation
 
     function UnescapeUnicode: WideChar;
     const
-      BYTEINDEX: array[1..4] of Integer = (2, 3, 0, 1);
+      BYTEINDEX: array[1..4] of Integer = (3, 4, 1, 2);
     var
       i: Integer;
-      c: ANSIChar;
-      buf: AnsiString;
+      c: WideChar;
+      buf: UnicodeString;
     begin
       SetLength(buf, 4);
 
       for i := 1 to 4 do
       begin
-        c := ANSIChar(NextChar);
+        c := PeekChar;
 
-        if c in ['0'..'9', 'a'..'f', 'A'..'F'] then
-          buf[BYTEINDEX[i]] := c
+        if (Ord(c) < 128) and (AnsiChar(c) in ['0'..'9', 'a'..'f', 'A'..'F']) then
+        begin
+          buf[i] := c;
+          ReadChar;
+        end
         else
           raise EJsonStreamError.CreateFmt('Invalid character ''%s'' in escaped Unicode', [c]);
-
-        ReadChar;
       end;
 
-      HexToBin(Str.FromAnsi(buf), result, 2);
+      Hex2Bin.ToBin(buf, @result);
     end;
 
   var
@@ -308,9 +311,9 @@ implementation
       if EOF then
         raise EJsonStreamError.Create('UnicodeString not terminated');
 
-      c := NextChar;
+      c := PeekChar;
 
-      if NOT aQuoted and (ANSIChar(c) in [#13, #10, #9, ' ', ',', '}', ']']) then
+      if NOT aQuoted and (Ord(c) < 128) and (AnsiChar(c) in [#13, #10, #9, ' ', ',', '}', ']']) then
         EXIT;
     end;
   end;
@@ -321,10 +324,12 @@ implementation
   var
     c: WideChar;
     s: UnicodeString;
+    int64Value: Int64;
+    extendedValue: Extended;
   begin
     result := NIL;
     try
-      c := NextRealChar;
+      c := PeekRealChar;
 
       case c of
         #0  : { NO-OP };
@@ -339,15 +344,15 @@ implementation
         '-'       : begin
                       ReadRealChar;
 
-                      c := NextChar;
+                      c := PeekChar;
                       case c of
                         '1'..'9'  : begin
                                       s := ReadString(FALSE);
 
-                                      if STR.IsInteger(s) then
-                                        result := JsonNumber.AsInt64(-1 * StrToInt64(s))
-                                      else if STR.IsNumeric(s) then
-                                        result := JsonNumber.AsExtended(-1 * StrToFloat(s))
+                                      if Parse(s).IsInt64(int64Value) then
+                                        result := JsonNumber.AsInt64(-1 * int64Value)
+                                      else if Parse(s).IsExtended(extendedValue) then
+                                        result := JsonNumber.AsExtended(-1 * extendedValue)
                                       else
                                         raise EJsonStreamError.CreateFmt('''%s'' is not a valid number', [s]);
                                     end;
@@ -359,10 +364,10 @@ implementation
         '0'..'9'  : begin
                       s := ReadString(FALSE);
 
-                      if STR.IsInteger(s) then
-                        result := JsonNumber.AsInt64(StrToInt(s))
-                      else if STR.IsNumeric(s) then
-                        result := JsonNumber.AsExtended(StrToFloat(s))
+                      if Parse(s).IsInt64(int64Value) then
+                        result := JsonNumber.AsInt64(int64Value)
+                      else if Parse(s).IsExtended(extendedValue) then
+                        result := JsonNumber.AsExtended(extendedValue)
                       else
                         raise EJsonStreamError.CreateFmt('''%s'' is not a valid number', [s]);
                     end;

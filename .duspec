@@ -37,11 +37,11 @@
         "src\\Deltics.Json.Exceptions.pas",
         "src\\Deltics.Json.Factories.pas",
         "src\\Deltics.Json.Formatter.pas",
-        "src\\Deltics.Json.Interfaces.pas",
         "src\\Deltics.Json.Member.pas",
         "src\\Deltics.Json.MemberValue.pas",
         "src\\Deltics.Json.Object_.pas",
         "src\\Deltics.Json.Reader.pas",
+        "src\\Deltics.Json.Types.pas",
         "src\\Deltics.Json.Utils.pas",
         "src\\Deltics.Json.Value.pas"
       ]

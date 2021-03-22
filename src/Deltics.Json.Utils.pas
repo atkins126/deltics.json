@@ -52,7 +52,7 @@ implementation
     Deltics.Hex2Bin,
     Deltics.IO.Text,
     Deltics.Strings,
-    Deltics.Strings.Encoding,
+    Deltics.StringEncodings,
     Deltics.Unicode,
     Deltics.Json.Exceptions,
     Deltics.Json.Formatter,

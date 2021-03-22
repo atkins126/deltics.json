@@ -10,7 +10,7 @@ interface
     Classes,
     TypInfo,
     Deltics.Datetime,
-    Deltics.Unicode;
+    Deltics.StringTypes;
 
 
   type

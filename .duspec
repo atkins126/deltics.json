@@ -19,14 +19,14 @@
     "deltics.inc:1.3.0",
     "deltics.datetime:1.0.0",
     "deltics.guids:1.0.0",
-    "deltics.hex2bin:1.1.0-beta.3",
-    "deltics.io.text:1.0.3-beta.1",
+    "deltics.hex2bin:1.1.0",
+    "deltics.io.text:1.0.3",
     "deltics.interfacedobjects:1.2.0",
-    "deltics.strings:2.0.0-beta.16",
-    "deltics.stringbuilders:2.0.0-beta.4",
-    "deltics.stringparsers:2.0.0-beta.13",
-    "deltics.stringtypes:1.1.0",
-    "deltics.unicode:1.0.1-beta.2"
+    "deltics.strings:2.0.0",
+    "deltics.stringbuilders:2.0.0",
+    "deltics.stringparsers:2.0.0",
+    "deltics.stringtypes:1.1.1",
+    "deltics.unicode:1.0.1"
   ],
   "source":{
       "files":[

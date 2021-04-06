@@ -12,15 +12,21 @@
       "product":"delphi",
       "versions":"[7 .. 10.3], !8"
     },
-  "copyright":"\u00A92019 Jolyon Direnko-Smith",
+  "copyright":"\u00a92019 Jolyon Direnko-Smith",
   "language":"en",
   "content":"source",
   "dependencies":[
     "deltics.inc:1.3.0",
     "deltics.datetime:1.0.0",
-    "deltics.io.text:1.0.2",
+    "deltics.guids:1.0.0",
+    "deltics.hex2bin:1.1.0",
+    "deltics.io.text:1.0.3",
     "deltics.interfacedobjects:1.2.0",
-    "deltics.strings:1.4.0"
+    "deltics.strings:2.0.0",
+    "deltics.stringbuilders:2.0.0",
+    "deltics.stringparsers:2.0.0",
+    "deltics.stringtypes:1.1.1",
+    "deltics.unicode:1.0.1"
   ],
   "source":{
       "files":[
@@ -31,11 +37,11 @@
         "src\\Deltics.Json.Exceptions.pas",
         "src\\Deltics.Json.Factories.pas",
         "src\\Deltics.Json.Formatter.pas",
-        "src\\Deltics.Json.Interfaces.pas",
         "src\\Deltics.Json.Member.pas",
         "src\\Deltics.Json.MemberValue.pas",
         "src\\Deltics.Json.Object_.pas",
         "src\\Deltics.Json.Reader.pas",
+        "src\\Deltics.Json.Types.pas",
         "src\\Deltics.Json.Utils.pas",
         "src\\Deltics.Json.Value.pas"
       ]

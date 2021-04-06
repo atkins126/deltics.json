@@ -10,9 +10,9 @@ interface
     TypInfo,
     Deltics.Datetime,
     Deltics.InterfacedObjects,
-    Deltics.Strings,
+    Deltics.Unicode,
     Deltics.Json.Exceptions,
-    Deltics.Json.Interfaces;
+    Deltics.Json.Types;
 
 
   type
@@ -58,8 +58,9 @@ interface
       constructor CreateObject;
       procedure ErrorIfNull(ExceptionClass: EJsonClass = NIL);
       procedure SetNull;
+      procedure SetValue(const aValueType: TValueType; const aValue: AnsiString); overload;
       procedure SetValue(const aValueType: TValueType; const aValue: UnicodeString); overload;
-      procedure SetValue(const aValueType: TValueType; const aValue: Utf8String); overload;
+      procedure SetValueUtf8(const aValueType: TValueType; const aValue: Utf8String);
     public
       constructor Create;
       property AsString: UnicodeString read fValue write set_AsString;
@@ -77,6 +78,7 @@ implementation
     Windows,
   {$endif}
     Deltics.Guids,
+    Deltics.Strings,
     Deltics.Json.Utils;
 
 
@@ -137,7 +139,7 @@ implementation
     case ValueType of
       jsBoolean : result := (AsString = 'true');
       jsString  : begin
-                    s := Str.Lowercase(AsString);
+                    s := Wide.Lowercase(AsString);
                     if (s = 'true') then        result := TRUE
                      else if (s = 'false') then result := FALSE
                     else
@@ -379,11 +381,9 @@ implementation
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.SetValue(const aValueType: TValueType;
-                                const aValue: Utf8String);
+                                const aValue: AnsiString);
   begin
-    fValueType  := aValueType;
-    fValue      := Wide.FromUtf8(aValue);
-    fIsNull     := FALSE;
+    SetValue(aValueType, Wide.FromAnsi(aValue));
   end;
 
 
@@ -397,6 +397,14 @@ implementation
   end;
 
 
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  procedure TJsonValue.SetValueUtf8(const aValueType: TValueType;
+                                    const aValue: Utf8String);
+  begin
+    fValueType  := aValueType;
+    fValue      := Wide.FromUtf8(aValue);
+    fIsNull     := FALSE;
+  end;
 
 
 //  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
@@ -519,7 +527,7 @@ implementation
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   procedure TJsonValue.set_AsUtf8(const aValue: Utf8String);
   begin
-    SetValue(jsString, aValue);
+    SetValueUtf8(jsString, aValue);
   end;
 
 

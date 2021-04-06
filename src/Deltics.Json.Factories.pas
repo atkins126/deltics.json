@@ -8,7 +8,7 @@ interface
 
   uses
     Deltics.Strings,
-    Deltics.Json.Interfaces;
+    Deltics.Json.Types;
 
 
   type
@@ -65,8 +65,8 @@ interface
       class function AsUtf8(const aValue: Utf8String): IJsonMutableValue;
       class function Decode(const aValue: UnicodeString): UnicodeString; overload;
       class function Decode(const aValue: Utf8String): UnicodeString; overload;
-      class function Encode(const aValue: UnicodeString): UnicodeString;
-      class function EncodeUtf8(const aValue: UnicodeString): Utf8String;
+      class function Encode(const aValue: UnicodeString; const aQuoted: Boolean = TRUE): UnicodeString;
+      class function EncodeUtf8(const aValue: UnicodeString; const aQuoted: Boolean = TRUE): Utf8String;
     end;
     JsonString = class of JsonStringFactory;
 
@@ -250,15 +250,23 @@ implementation
   end;
 
 
-  class function JsonStringFactory.Encode(const aValue: UnicodeString): UnicodeString;
+  class function JsonStringFactory.Encode(const aValue: UnicodeString;
+                                          const aQuoted: Boolean): UnicodeString;
   begin
-    result := Json.EncodeString(aValue);
+    if aQuoted then
+      result := Json.EncodeString(aValue)
+    else
+      result := Json.EncodeStringContent(aValue);
   end;
 
 
-  class function JsonStringFactory.EncodeUtf8(const aValue: UnicodeString): Utf8String;
+  class function JsonStringFactory.EncodeUtf8(const aValue: UnicodeString;
+                                              const aQuoted: Boolean): Utf8String;
   begin
-    result := Json.EncodeUtf8(aValue);
+    if aQuoted then
+      result := Json.EncodeUtf8Quoted(aValue)
+    else
+      result := Json.EncodeUtf8(aValue);
   end;
 
 

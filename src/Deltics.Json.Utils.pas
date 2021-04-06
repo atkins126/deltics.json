@@ -10,8 +10,8 @@ interface
     Classes,
     SysUtils,
     Deltics.Datetime,
-    Deltics.Strings,
-    Deltics.Json.Interfaces;
+    Deltics.StringTypes,
+    Deltics.Json.Types;
 
   type
     TJsonDateTimeParts = (dpYear, dpMonth, dpDay, dpTime, dpOffset);
@@ -30,37 +30,53 @@ interface
       class function EncodeDateTime(const aDateTime: TDateTime; const aDateAccuracy: TJsonDatePart): UnicodeString; overload;
       class function EncodeDateTime(const aDateTime: TDateTime; const aOffset: SmallInt): UnicodeString; overload;
       class function EncodeDateTime(const aDateTime: TDateTime; const aDateAccuracy: TJsonDatePart; const aOffset: SmallInt): UnicodeString; overload;
+      class function EncodeStringContent(const aString: UnicodeString): UnicodeString;
       class function EncodeString(const aString: UnicodeString): UnicodeString;
       class function EncodeUtf8(const aValue: UnicodeString): Utf8String;
+      class function EncodeUtf8Quoted(const aValue: UnicodeString): Utf8String;
+
+      class function AsUtf8(const aValue: IJsonValue; const aFormat: TJsonFormat = jfStandard): Utf8String;
 
       class function FromFile(const aFilename: String): IJsonMutableValue;
       class function FromStream(aStream: TStream): IJsonMutableValue; overload;
       class function FromString(const aString: String): IJsonMutableValue; overload;
 
+      class procedure SaveToFile(const aValue: IJsonValue; const aFilename: String; const aFormat: TJsonFormat = jfStandard);
+      class procedure SaveToStream(const aValue: IJsonValue; const aStream: TStream; const aFormat: TJsonFormat = jfStandard);
     end;
 
 
 implementation
 
   uses
-    Deltics.io.Text,
-    Deltics.Pointers,
+    Deltics.Hex2Bin,
+    Deltics.IO.Text,
+    Deltics.Strings,
+    Deltics.StringEncodings,
+    Deltics.Unicode,
     Deltics.Json.Exceptions,
+    Deltics.Json.Formatter,
     Deltics.Json.Reader;
+
+
+  class function Json.AsUtf8(const aValue: IJsonValue; const aFormat: TJsonFormat): Utf8String;
+  begin
+    result := JsonFormatter.Format(aValue, aFormat);
+  end;
 
 
   class function Json.DecodeDate(const aString: UnicodeString): TDateTime;
 
-    function Pop(var S: String;
+    function Pop(var S: UnicodeString;
                  const aLen: Integer;
-                 const aValidNextChars: TAnsiCharSet;
-                 var   aNextChar: Char): Word;
+                 const aValidNextChars: AnsiCharSet;
+                 var   aNextChar: WideChar): Word;
     var
       ok: Boolean;
-      nextChar: AnsiChar;
+      nextChar: WideChar;
     begin
       ok        := TRUE;
-      nextChar  := AnsiChar(#0);
+      nextChar  := #0;
 
       // Determine the AnsiChar that follows immediately after the value of the
       //  specified length that we are about to extract from the string.
@@ -77,11 +93,14 @@ implementation
       //  the string is not a valid Json encoded date.
 
       if (Length(S) > aLen) then
-        nextChar := AnsiChar(S[aLen + 1])
+      begin
+        nextChar := S[aLen + 1];
+        ok := Ord(nextChar) < 128;
+      end
       else if (Length(S) < aLen) then
         ok := FALSE;
 
-      ok := ok and (nextChar in aValidNextChars);
+      ok := ok and (AnsiChar(nextChar) in aValidNextChars);
 
       if NOT ok then
         raise EJsonConvertError.CreateFmt('''%s'' is not a valid Json date/time', [aString]);
@@ -99,8 +118,8 @@ implementation
     end;
 
   var
-    c: Char;
-    s: String;
+    c: WideChar;
+    s: UnicodeString;
     year, month, day: Word;
     hour, min, sec, msec, zh, zm: Word;
     z: Integer;
@@ -169,19 +188,19 @@ implementation
 
   class function Json.EncodeDate(const aYear: Word): UnicodeString;
   begin
-    result := WIDE.PadLeft(aYear, 4, '0');
+    result := WIDE.PadLeft(Wide(aYear), 4, '0');
   end;
 
 
   class function Json.EncodeDate(const aYear, aMonth: Word): UnicodeString;
   begin
-    result := self.EncodeDate(aYear) + '-' + WIDE.PadLeft(aMonth, 2, '0');
+    result := self.EncodeDate(aYear) + '-' + WIDE.PadLeft(Wide(aMonth), 2, '0');
   end;
 
 
   class function Json.EncodeDate(const aYear, aMonth, aDay: Word): UnicodeString;
   begin
-    result := self.EncodeDate(aYear, aMonth) + '-' + WIDE.PadLeft(aDay, 2, '0');
+    result := self.EncodeDate(aYear, aMonth) + '-' + WIDE.PadLeft(Wide(aDay), 2, '0');
   end;
 
 
@@ -220,8 +239,8 @@ implementation
       zh    := Abs(aOffset) div 60;
       zm    := Abs(aOffset) mod 60;
 
-      result := EncodeDateTime(aDateTime, aDateAccuracy) + SIGN[isPos] + WIDE.PadLeft(zh, 2, '0')
-                                                                 + ':' + WIDE.PadLeft(zm, 2, '0');
+      result := EncodeDateTime(aDateTime, aDateAccuracy) + SIGN[isPos] + WIDE.PadLeft(Wide(zh), 2, '0')
+                                                                 + ':' + WIDE.PadLeft(Wide(zm), 2, '0');
     end
     else
       result := EncodeDate(aDateTime, aDateAccuracy) + 'Z';
@@ -232,16 +251,13 @@ implementation
   class function Json.DecodeString(const aValue: UnicodeString): UnicodeString;
 
     function UnescapeUnicode(var aI: Integer): WideChar;
-    var
-      buf: array[0..3] of WideChar;
     begin
-      buf[2] := aValue[aI + 1];
-      buf[3] := aValue[aI + 2];
-      buf[0] := aValue[aI + 3];
-      buf[1] := aValue[aI + 4];
+      // At this point aI (the index into aValue) has not yet been advanced over
+      //  the 'u' in the preceding \u sequence, but it will be AFTER we have
+      //  decoded the HEX sequence.  So we offset to the beginning of the HEX
+      //  by +1 of aI but still only increment by the +4 HEX chars we have decoded.
 
-      HexToBin(PWideChar(@buf), result, 2);
-
+      Hex2Bin.ToBin(PWideChar(@aValue[aI + 1]), 4, @result);
       Inc(aI, 4);
     end;
 
@@ -319,23 +335,11 @@ implementation
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  class function Json.EncodeString(const aString: UnicodeString): UnicodeString;
-
-    function EscapeUnicode(const aChar: WideChar): UnicodeString;
-    var
-      buf: array[0..3] of WideChar;
-    begin
-      Classes.BinToHex(@aChar, PWideChar(@buf), 2);
-
-      result := '\u' + buf[2] + buf[3] + buf[0] + buf[1];
-    end;
-
+  class function Json.EncodeStringContent(const aString: UnicodeString): UnicodeString;
   var
     i: Integer;
     c: WideChar;
   begin
-    result := '"';
-
     for i := 1 to Length(aString) do
     begin
       c := aString[i];
@@ -348,25 +352,70 @@ implementation
         #12 : result := result + '\f';
         #13 : result := result + '\r';
       else
-        // TODO: Escape encoding of Unicode should be optional for anything other than non-printables
         if (Word(c) < 32) or (Word(c) > 127) then
-          result := result + EscapeUnicode(c)
+          result := result + Unicode.EscapeW(c, JsonEscape)
         else
           result := result + c;
       end;
     end;
-
-    result := result + '"';
   end;
 
 
-  class function Json.EncodeUtf8(const aValue: UnicodeString): Utf8String;
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class function Json.EncodeString(const aString: UnicodeString): UnicodeString;
   begin
-    // TODO: Encode as Utf8 char-wise rather than encoding then converting
-    result := Utf8.FromWIDE(EncodeString(aValue));
+    result := '"' + EncodeStringContent(aString) + '"';
   end;
 
 
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class function Json.EncodeUtf8(const aValue: UnicodeString): Utf8String;
+  const
+    ESC_Quote           : Utf8String = '\"';
+    ESC_Slash           : Utf8String = '\/';
+    ESC_Backslash       : Utf8String = '\\';
+    ESC_Backspace       : Utf8String = '\b';
+    ESC_Tab             : Utf8String = '\t';
+    ESC_Newline         : Utf8String = '\n';
+    ESC_FormFeed        : Utf8String = '\f';
+    ESC_CarriageReturn  : Utf8String = '\r';
+  var
+    i: Integer;
+    c: WideChar;
+  begin
+    result := '';
+
+    for i := 1 to Length(aValue) do
+    begin
+      c := aValue[i];
+
+      case c of
+        '"' : result := result + ESC_Quote;
+        '/' : result := result + ESC_Slash;
+        '\' : result := result + ESC_BackSlash;
+        #8  : result := result + ESC_Backspace;
+        #9  : result := result + ESC_Tab;
+        #10 : result := result + ESC_Newline;
+        #12 : result := result + ESC_FormFeed;
+        #13 : result := result + ESC_CarriageReturn;
+      else
+        if (Word(c) < 32) or (Word(c) > 127) then
+          result := Utf8.Append(result, Unicode.EscapeUtf8(c, JsonEscape))
+        else
+          result := Utf8.Append(result, Utf8Char(c));
+      end;
+    end;
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  class function Json.EncodeUtf8Quoted(const aValue: UnicodeString): Utf8String;
+  begin
+    result := '"' + EncodeUtf8(aValue) + '"';
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
   class function Json.FromFile(const aFilename: String): IJsonMutableValue;
   var
     src: TFileStream;
@@ -406,7 +455,27 @@ implementation
   end;
 
 
+  class procedure Json.SaveToFile(const aValue: IJsonValue; const aFilename: String; const aFormat: TJsonFormat);
+  var
+    stream: TFileStream;
+  begin
+    stream := TFileStream.Create(aFilename, fmCreate or fmShareExclusive);
+    try
+      SaveToStream(aValue, stream);
 
+    finally
+      stream.Free;
+    end;
+  end;
+
+
+  class procedure Json.SaveToStream(const aValue: IJsonValue; const aStream: TStream; const aFormat: TJsonFormat);
+  var
+    data: Utf8String;
+  begin
+    data := JsonFormatter.Format(aValue, aFormat);
+    aStream.Write(data[1], Length(data));
+  end;
 
 
 

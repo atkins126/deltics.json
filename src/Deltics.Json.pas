@@ -49,19 +49,19 @@ interface
     Deltics.Json.Exceptions,
     Deltics.Json.Factories,
     Deltics.Json.Formatter,
-    Deltics.Json.Interfaces,
+    Deltics.Json.Types,
     Deltics.Json.Utils;
 
 
   type
-    TJsonValueType = Deltics.Json.Interfaces.TValueType;
+    TJsonValueType = Deltics.Json.Types.TValueType;
   const
-    jsObject    = Deltics.Json.Interfaces.jsObject;
-    jsArray     = Deltics.Json.Interfaces.jsArray;
-    jsString    = Deltics.Json.Interfaces.jsString;
-    jsNumber    = Deltics.Json.Interfaces.jsNumber;
-    jsBoolean   = Deltics.Json.Interfaces.jsBoolean;
-    jsNull      = Deltics.Json.Interfaces.jsNull;
+    jsObject    = Deltics.Json.Types.jsObject;
+    jsArray     = Deltics.Json.Types.jsArray;
+    jsString    = Deltics.Json.Types.jsString;
+    jsNumber    = Deltics.Json.Types.jsNumber;
+    jsBoolean   = Deltics.Json.Types.jsBoolean;
+    jsNull      = Deltics.Json.Types.jsNull;
 
 
   type
@@ -76,11 +76,11 @@ interface
 
 
   type
-    TJsonFormat = Deltics.Json.Formatter.TJsonFormat;
+    TJsonFormat = Deltics.Json.Types.TJsonFormat;
   const
-    jfStandard  = Deltics.Json.Formatter.jfStandard;
-    jfCompact   = Deltics.Json.Formatter.jfCompact;
-    jfConfig    = Deltics.Json.Formatter.jfConfig;
+    jfStandard  = Deltics.Json.Types.jfStandard;
+    jfCompact   = Deltics.Json.Types.jfCompact;
+    jfConfig    = Deltics.Json.Types.jfConfig;
 
 
   type
@@ -88,10 +88,11 @@ interface
 
 
   type
-    IJsonArray        = Deltics.Json.Interfaces.IJsonArray;
-    IJsonMutableValue = Deltics.Json.Interfaces.IJsonMutableValue;
-    IJsonObject       = Deltics.Json.Interfaces.IJsonObject;
-    IJsonValue        = Deltics.Json.Interfaces.IJsonValue;
+    IJsonArray        = Deltics.Json.Types.IJsonArray;
+    IJsonCollection   = Deltics.Json.Types.IJsonCollection;
+    IJsonMutableValue = Deltics.Json.Types.IJsonMutableValue;
+    IJsonObject       = Deltics.Json.Types.IJsonObject;
+    IJsonValue        = Deltics.Json.Types.IJsonValue;
 
     Json        = Deltics.Json.Utils.Json;
 
